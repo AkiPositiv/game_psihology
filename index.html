@@ -3,592 +3,692 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра «Кораблекрушение» / Kema halokati o'yini</title>
+    <title>Психологические игры</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
+        /* General Styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a192f;
-            color: #cdd6f4;
-            background-image:
-                radial-gradient(circle at 25% 30%, rgba(20, 83, 153, 0.3) 0%, transparent 40%),
-                radial-gradient(circle at 75% 70%, rgba(13, 38, 76, 0.4) 0%, transparent 40%);
+            background-color: #111827;
+            color: #f3f4f6;
+            transition: background-color 0.5s ease;
         }
-        .font-serif {
-            font-family: 'Playfair Display', serif;
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .card {
+            background-color: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #4b5563;
         }
-        .item-card {
-            transition: all 0.3s ease;
-            border: 2px solid #1e293b;
-            cursor: pointer;
+        .btn { transition: all 0.2s ease-in-out; }
+        .btn-primary { background-color: #3b82f6; color: white; }
+        .btn-primary:hover:not(:disabled) { background-color: #60a5fa; }
+        .btn-primary:disabled { background-color: #1e3a8a; color: #9ca3af; cursor: not-allowed; opacity: 0.6; }
+        .btn-secondary { background-color: #4b5563; color: #d1d5db; }
+        .btn-secondary:hover:not(:disabled) { background-color: #6b7280; }
+        .form-input {
+            background-color: #1f2937;
+            border: 1px solid #4b5563;
+            color: #f3f4f6;
         }
-        .item-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            border-color: #38bdf8;
-        }
-        .item-card.selected {
-            border-color: #67e8f9;
-            box-shadow: 0 0 20px rgba(103, 232, 249, 0.5);
-            transform: scale(1.05);
-        }
-        .item-card .overlay {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .item-card.selected .overlay {
-            opacity: 1;
-        }
-        #curtain {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 100%;
-            background: linear-gradient(to top, #0a192f, #112240);
-            z-index: 20;
-            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-            transform-origin: bottom;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 5vh;
-        }
-        #curtain.raised {
-            transform: translateY(-100%);
-        }
-        .fade-in {
-            animation: fadeIn 1s ease-in-out forwards;
-        }
-        .fade-in-fast {
-            animation: fadeIn 0.5s ease-in-out forwards;
-        }
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 1s ease-in-out forwards; opacity: 0; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .results-content {
-            position: relative;
-            z-index: 10;
+
+        /* Shipwreck Game Specific Styles */
+        #shipwreck-game-wrapper {
+             background-color: #0a192f;
+             background-image:
+                radial-gradient(circle at 25% 30%, rgba(20, 83, 153, 0.3) 0%, transparent 40%),
+                radial-gradient(circle at 75% 70%, rgba(13, 38, 76, 0.4) 0%, transparent 40%);
         }
-        .form-input {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            color: #e2e8f0;
+        .shipwreck-card { background-color: rgba(17, 34, 64, 0.8); }
+        .item-card {
+            transition: all 0.3s ease; border: 2px solid #1e293b; cursor: pointer;
         }
-        .btn {
-            transition: all 0.2s ease-in-out;
+        .item-card:hover {
+            transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); border-color: #38bdf8;
         }
-        .btn-primary { background-color: #0ea5e9; color: white; }
-        .btn-primary:hover:not(:disabled) { background-color: #38bdf8; }
-        .btn-secondary { background-color: #334155; color: #94a3b8; }
-        .btn-secondary:hover:not(:disabled) { background-color: #475569; }
-        .btn:disabled { background-color: #475569; color: #64748b; cursor: not-allowed; opacity: 0.5; }
+        .item-card.selected {
+            border-color: #67e8f9; box-shadow: 0 0 20px rgba(103, 232, 249, 0.5); transform: scale(1.05);
+        }
+        .item-card .overlay { opacity: 0; transition: opacity 0.3s ease; }
+        .item-card.selected .overlay { opacity: 1; }
+        #shipwreck-game-wrapper #curtain {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 100%;
+            background: linear-gradient(to top, #0a192f, #112240);
+            z-index: 20; transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+            transform-origin: bottom;
+        }
+        #shipwreck-game-wrapper #curtain.raised { transform: translateY(-100%); }
+
+        /* Stroop Game Specific Styles */
+        #stroop-game-wrapper {
+             background-image: radial-gradient(circle at 1px 1px, #374151 1px, transparent 0);
+             background-size: 20px 20px;
+        }
+        .color-btn {
+            font-weight: 700; font-size: 1.125rem; padding: 1rem 2rem;
+            border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: scale(1);
+        }
+        .color-btn:hover { transform: scale(1.05); box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); }
+        #stroop-word {
+            font-weight: 900; text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            -webkit-user-select: none; user-select: none;
+        }
+        .feedback {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999;
+            pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+        }
+        .feedback.correct { background: radial-gradient(circle, rgba(74, 222, 128, 0.4) 0%, rgba(74, 222, 128, 0) 70%); opacity: 1; }
+        .feedback.incorrect { background: radial-gradient(circle, rgba(248, 113, 113, 0.4) 0%, rgba(248, 113, 113, 0) 70%); opacity: 1; }
     </style>
 </head>
-<body class="min-h-screen p-4 sm:p-8 flex items-center justify-center">
+<body class="min-h-screen">
 
-    <div id="language-switcher" class="hidden fixed top-4 right-4 z-50">
-        <button id="lang-toggle-btn" class="btn btn-secondary px-3 py-2 rounded-md font-semibold text-sm"></button>
+    <!-- Main Menu -->
+    <section id="main-menu-section" class="min-h-screen p-4 flex items-center justify-center">
+        <div class="container mx-auto max-w-2xl">
+            <div class="card p-8 rounded-xl shadow-2xl text-center">
+                <h1 class="text-4xl font-serif text-blue-300 mb-2">Психологические игры</h1>
+                <p class="text-lg text-gray-300 mb-8">Выберите игру, чтобы начать</p>
+                <div class="flex flex-col space-y-4">
+                    <button id="start-shipwreck-btn" class="btn btn-primary py-3 rounded-md font-bold text-lg">Кораблекрушение</button>
+                    <button id="start-stroop-btn" class="btn btn-primary py-3 rounded-md font-bold text-lg">Эффект Струпа</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Back to Menu Button -->
+    <div id="back-to-menu-container" class="fixed top-4 left-4 z-50 hidden">
+         <button id="back-to-menu-btn" class="btn btn-secondary px-3 py-2 rounded-md font-semibold text-sm">&larr; Главное меню</button>
     </div>
 
-    <div class="container mx-auto max-w-7xl">
-        <!-- Часть -1: Выбор языка -->
-        <section id="language-selection">
-            <div class="max-w-md mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 shadow-2xl border border-slate-700 text-center">
-                 <h1 class="text-3xl font-serif text-sky-300 mb-6">Выберите язык / Tilni tanlang</h1>
-                 <div class="flex flex-col space-y-4">
-                    <button class="btn btn-primary py-3 rounded-md font-bold text-lg" onclick="initGame('ru')">Русский</button>
-                    <button class="btn btn-primary py-3 rounded-md font-bold text-lg" onclick="initGame('uz')">O'zbekcha</button>
-                 </div>
-            </div>
-        </section>
+    <!-- Game Wrappers -->
+    <div id="shipwreck-game-wrapper" class="hidden min-h-screen p-4 sm:p-8 flex items-center justify-center relative"></div>
+    <div id="stroop-game-wrapper" class="hidden min-h-screen p-4 flex items-center justify-center relative"></div>
 
-        <!-- Часть 0: Настройка команды -->
-        <section id="setup-section" class="hidden">
-            <div class="max-w-2xl mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700">
-                <h1 class="text-3xl sm:text-4xl font-serif text-sky-300 mb-2 text-center" data-lang="setupTitle"></h1>
-                <p class="text-center text-slate-400 mb-8" data-lang="setupSubtitle"></p>
-                <div class="space-y-6">
-                    <div>
-                        <label for="team-name" class="block text-sm font-medium text-slate-300 mb-2" data-lang="teamNameLabel"></label>
-                        <input type="text" id="team-name" class="form-input w-full rounded-md p-2" data-lang-placeholder="teamNamePlaceholder">
+    <!-- TEMPLATES FOR GAMES -->
+    <template id="shipwreck-template">
+        <div class="container mx-auto max-w-7xl">
+            <!-- Часть -1: Выбор языка -->
+            <section id="language-selection">
+                <div class="max-w-md mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 shadow-2xl border border-slate-700 text-center">
+                    <h1 class="text-3xl font-serif text-sky-300 mb-6">Выберите язык / Tilni tanlang</h1>
+                    <div class="flex flex-col space-y-4">
+                        <button class="btn btn-primary py-3 rounded-md font-bold text-lg" data-lang-choice="ru">Русский</button>
+                        <button class="btn btn-primary py-3 rounded-md font-bold text-lg" data-lang-choice="uz">O'zbekcha</button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2"><span data-lang="participantsLabel"></span> (<span id="participant-count">0</span>/15)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="participant-name" class="form-input w-full rounded-md p-2" data-lang-placeholder="participantNamePlaceholder">
-                            <button id="add-participant-btn" class="btn btn-secondary px-4 py-2 rounded-md font-semibold" data-lang="addBtn"></button>
+                </div>
+            </section>
+            <!-- Часть 0: Настройка команды -->
+            <section id="setup-section" class="hidden">
+                <div class="max-w-2xl mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700">
+                    <div id="language-switcher" class="fixed top-4 right-4 z-50">
+                        <button id="lang-toggle-btn" class="btn btn-secondary px-3 py-2 rounded-md font-semibold text-sm"></button>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-serif text-sky-300 mb-2 text-center" data-lang="setupTitle"></h1>
+                    <p class="text-center text-slate-400 mb-8" data-lang="setupSubtitle"></p>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="team-name" class="block text-sm font-medium text-slate-300 mb-2" data-lang="teamNameLabel"></label>
+                            <input type="text" id="team-name" class="form-input w-full rounded-md p-2" data-lang-placeholder="teamNamePlaceholder">
                         </div>
-                         <p class="text-xs text-slate-500 mt-2" data-lang="participantsRule"></p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-slate-300 mb-2" data-lang="teamListLabel"></h3>
-                        <ul id="participants-list" class="bg-slate-900/50 p-3 rounded-md min-h-[80px] space-y-1">
-                            <li id="no-participants" class="text-slate-500 italic" data-lang="noParticipants"></li>
-                        </ul>
-                    </div>
-                    <button id="start-game-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-lg" data-lang="startGameBtn" disabled></button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Основная игра (скрыта по умолчанию) -->
-        <div id="game-container" class="hidden">
-            <header class="text-center mb-8">
-                <h1 class="text-4xl sm:text-6xl font-serif text-sky-300 mb-2 fade-in" data-lang="gameTitle"></h1>
-                <p class="text-lg text-slate-400 max-w-3xl mx-auto fade-in" style="animation-delay: 0.2s;" data-lang="gameSubtitle"></p>
-            </header>
-            <main id="game-section" class="fade-in" style="animation-delay: 0.4s;">
-                <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700 mb-8">
-                    <h2 class="text-2xl font-bold text-sky-400 mb-3" data-lang="scenarioTitle"></h2>
-                    <p class="text-slate-300 leading-relaxed" data-lang="scenarioText"></p>
-                </div>
-                <div class="sticky top-4 bg-slate-900/80 backdrop-blur-md p-4 rounded-lg z-10 shadow-lg mb-8 border border-slate-700">
-                     <h3 class="text-xl font-bold text-center text-sky-400 mb-2" data-lang="yourChoice"></h3>
-                     <div id="selected-items-display" class="flex flex-wrap gap-3 justify-center min-h-[40px]">
-                         <p id="selection-placeholder" class="text-slate-500 italic" data-lang="selectItemsPlaceholder"></p>
-                     </div>
-                </div>
-                <div id="items-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6"></div>
-            </main>
-            <div id="results-container" class="relative mt-12 overflow-hidden">
-                <div class="results-content p-6 sm:p-8 rounded-xl bg-slate-800/50 border border-slate-700">
-                    <div class="text-center mb-8">
-                        <h2 class="text-3xl sm:text-4xl font-serif text-green-300 mb-2" data-lang="expertsRatingTitle"></h2>
-                        <p class="text-slate-400 max-w-2xl mx-auto" data-lang="expertsRatingSubtitle"></p>
-                    </div>
-                    <div class="space-y-6 mb-12" id="expert-results-list"></div>
-                    <div class="border-t border-slate-700 pt-8">
-                        <h2 class="text-3xl sm:text-4xl font-serif text-amber-300 mb-6 text-center" data-lang="discussionTitle"></h2>
-                        <div id="discussion-questions" class="space-y-4 text-slate-300"></div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2"><span data-lang="participantsLabel"></span> (<span id="participant-count">0</span>/15)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="participant-name" class="form-input w-full rounded-md p-2" data-lang-placeholder="participantNamePlaceholder">
+                                <button id="add-participant-btn" class="btn btn-secondary px-4 py-2 rounded-md font-semibold" data-lang="addBtn"></button>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2" data-lang="participantsRule"></p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-300 mb-2" data-lang="teamListLabel"></h3>
+                            <ul id="participants-list" class="bg-slate-900/50 p-3 rounded-md min-h-[80px] space-y-1"></ul>
+                        </div>
+                        <button id="start-game-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-lg" data-lang="startGameBtn" disabled></button>
                     </div>
                 </div>
-                <div id="curtain">
-                    <div class="text-center">
-                        <button id="submit-button" class="btn btn-primary text-xl font-bold py-4 px-8 rounded-lg shadow-lg transform hover:scale-105 cursor-pointer transition-opacity" data-lang="submitBtn" disabled></button>
-                        <p id="submit-helper-text" class="mt-4 text-slate-400"></p>
+            </section>
+            <!-- Основная игра -->
+            <div id="game-container" class="hidden">
+                <header class="text-center mb-8">
+                    <h1 class="text-4xl sm:text-6xl font-serif text-sky-300 mb-2 fade-in" data-lang="gameTitle"></h1>
+                    <p class="text-lg text-slate-400 max-w-3xl mx-auto fade-in" style="animation-delay: 0.2s;" data-lang="gameSubtitle"></p>
+                </header>
+                <main id="game-section" class="fade-in" style="animation-delay: 0.4s;">
+                    <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700 mb-8">
+                        <h2 class="text-2xl font-bold text-sky-400 mb-3" data-lang="scenarioTitle"></h2>
+                        <p class="text-slate-300 leading-relaxed" data-lang="scenarioText"></p>
+                    </div>
+                    <div class="sticky top-4 bg-slate-900/80 backdrop-blur-md p-4 rounded-lg z-10 shadow-lg mb-8 border border-slate-700">
+                        <h3 class="text-xl font-bold text-center text-sky-400 mb-2" data-lang="yourChoice"></h3>
+                        <div id="selected-items-display" class="flex flex-wrap gap-3 justify-center min-h-[40px]"></div>
+                    </div>
+                    <div id="items-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6"></div>
+                </main>
+                <div id="results-container" class="relative mt-12 overflow-hidden">
+                    <div class="results-content p-6 sm:p-8 rounded-xl bg-slate-800/50 border border-slate-700">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl sm:text-4xl font-serif text-green-300 mb-2" data-lang="expertsRatingTitle"></h2>
+                            <p class="text-slate-400 max-w-2xl mx-auto" data-lang="expertsRatingSubtitle"></p>
+                        </div>
+                        <div class="space-y-6 mb-12" id="expert-results-list"></div>
+                        <div class="border-t border-slate-700 pt-8">
+                            <h2 class="text-3xl sm:text-4xl font-serif text-amber-300 mb-6 text-center" data-lang="discussionTitle"></h2>
+                            <div id="discussion-questions" class="space-y-4 text-slate-300"></div>
+                        </div>
+                    </div>
+                    <div id="curtain" class="flex flex-col justify-end items-center pb-[5vh]">
+                        <div class="text-center">
+                            <button id="submit-button" class="btn btn-primary text-xl font-bold py-4 px-8 rounded-lg shadow-lg transform hover:scale-105" data-lang="submitBtn" disabled></button>
+                            <p id="submit-helper-text" class="mt-4 text-slate-400"></p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </template>
 
-    <script>
-        // --- TRANSLATIONS & DATA ---
-        const translations = {
-            ru: {
-                setupTitle: "Подготовка к Игре",
-                setupSubtitle: "Создайте свою команду для приключения.",
-                teamNameLabel: "Название команды",
-                teamNamePlaceholder: "Например, 'Морские Волки'",
-                participantsLabel: "Участники",
-                addBtn: "Добавить",
-                participantsRule: "Минимум 3 участника для начала игры.",
-                teamListLabel: "Список команды:",
-                noParticipants: "Здесь появятся имена участников...",
-                startGameBtn: "Начать игру",
-                gameTitle: "Кораблекрушение",
-                gameSubtitle: "Классическое упражнение на групповое принятие решений в стрессовой ситуации.",
-                scenarioTitle: "Сценарий",
-                scenarioText: "Вы — команда, выжившая после кораблекрушения. Вы оказались на необитаемом острове. У вас есть список из 15 предметов, выброшенных на берег. Ваша спасательная шлюпка может вместить <strong class='text-yellow-300'>только 5 из них</strong>, чтобы отправиться к соседнему, более безопасному острову. Ваша задача — <strong class='text-yellow-300'>за 10 минут</strong> договориться и выбрать 5 самых важных предметов.",
-                yourChoice: "Ваш выбор (<span id='selected-count'>0</span>/5)",
-                selectItemsPlaceholder: "Выберите предметы из списка ниже...",
-                submitBtn: "Отправить",
-                submitHelperDefault: "Сделайте выбор из 5 предметов, чтобы продолжить",
-                submitHelperSuccess: "Отлично! Теперь можно отправлять результаты.",
-                submitHelperMore: "Выберите еще {count} предмет(а).",
-                expertsRatingTitle: "Рейтинг Экспертов",
-                expertsRatingSubtitle: "Сравните ваш выбор с рейтингом, составленным экспертами по выживанию.",
-                yourChoiceChip: "ВАШ ВЫБОР",
-                discussionTitle: "Обсуждение и Рефлексия",
-                telegramTitle: "Результаты игры \"Кораблекрушение\"",
-                telegramTeam: "Команда",
-                telegramParticipants: "Участники",
-                telegramItems: "Выбранные предметы",
-                langToggle: "O'zbekcha",
-                alertMaxItems: "Можно выбрать только 5 предметов!"
-            },
-            uz: {
-                setupTitle: "O'yinga tayyorgarlik",
-                setupSubtitle: "Sarguzasht uchun o'z jamoangizni yarating.",
-                teamNameLabel: "Jamoa nomi",
-                teamNamePlaceholder: "Masalan, 'Dengiz Bo'rilari'",
-                participantsLabel: "Ishtirokchilar",
-                addBtn: "Qo'shish",
-                participantsRule: "O'yinni boshlash uchun kamida 3 ishtirokchi kerak.",
-                teamListLabel: "Jamoa ro'yxati:",
-                noParticipants: "Ishtirokchilarning ismlari shu yerda paydo bo'ladi...",
-                startGameBtn: "O'yinni boshlash",
-                gameTitle: "Kema halokati",
-                gameSubtitle: "Stressli vaziyatda guruh bo'lib qaror qabul qilish uchun klassik mashq.",
-                scenarioTitle: "Ssenariy",
-                scenarioText: "Siz — kema halokatidan omon qolgan jamoasiz. Siz kimsasiz orolga tushib qoldingiz. Sohilda 15 ta narsa yotibdi. Sizning qutqaruv qayig'ingiz qo'shni, xavfsizroq orolga borish uchun ulardan <strong class='text-yellow-300'>faqat 5 tasini</strong> sig'dira oladi. Sizning vazifangiz — <strong class='text-yellow-300'>10 daqiqa ichida</strong> kelishib, eng muhim 5 ta narsani tanlash.",
-                yourChoice: "Sizning tanlovingiz (<span id='selected-count'>0</span>/5)",
-                selectItemsPlaceholder: "Quyidagi ro'yxatdan narsalarni tanlang...",
-                submitBtn: "Yuborish",
-                submitHelperDefault: "Davom etish uchun 5 ta narsani tanlang",
-                submitHelperSuccess: "Ajoyib! Endi natijalarni yuborish mumkin.",
-                submitHelperMore: "Yana {count} ta narsa tanlang.",
-                expertsRatingTitle: "Mutaxassislar reytingi",
-                expertsRatingSubtitle: "O'z tanlovingizni omon qolish bo'yicha mutaxassislar tomonidan tuzilgan reyting bilan solishtiring.",
-                yourChoiceChip: "SIZNING TANLOVINGIZ",
-                discussionTitle: "Muhokama va Tahlil",
-                telegramTitle: "\"Kema halokati\" o'yini natijalari",
-                telegramTeam: "Jamoa",
-                telegramParticipants: "Ishtirokchilar",
-                telegramItems: "Tanlangan narsalar",
-                langToggle: "Русский",
-                alertMaxItems: "Faqat 5 ta narsa tanlash mumkin!"
-            }
-        };
-
-        const svgIcons = {
-            water: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2H10.5C8.01472 2 6 4.01472 6 6.5V17.5C6 19.9853 8.01472 22 10.5 22H13.5C15.9853 22 18 19.9853 18 17.5V6.5C18 4.01472 15.9853 2 13.5 2Z"></path><path d="M9 12H15"></path><path d="M12 9V15"></path></svg>`,
-            matches: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H16C17.6569 21 19 19.6569 19 18V6C19 4.34315 17.6569 3 16 3Z"></path><path d="M12 16V10"></path><path d="M9 7H15"></path></svg>`,
-            map: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18L15 15.5L21 18V3L15 5.5L9 3L3 5.5V21L9 18Z"></path><path d="M15 5.5V15.5"></path><path d="M9 3V18"></path></svg>`,
-            firstAid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6H4C2.89543 6 2 6.89543 2 8V20C2 21.1046 2.89543 22 4 22H20C21.1046 22 22 21.1046 22 20V8C22 6.89543 21.1046 6 20 6Z"></path><path d="M10 4V2"></path><path d="M14 4V2"></path><path d="M12 12H16"></path><path d="M14 10V14"></path></svg>`,
-            axe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.464 12.464L10.01 17.919C8.45501 19.474 6.00035 19.474 4.44536 17.919C2.89037 16.364 2.89037 13.9093 4.44536 12.3543L12.354 4.44563C13.909 2.89064 16.3637 2.89064 17.9187 4.44563L18.989 5.51594"></path><path d="M9 9L15 15"></path></svg>`,
-            rope: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"></path><path d="M12 12V22"></path><path d="M7 7C4.23858 7 2 9.23858 2 12C2 14.7614 4.23858 17 7 17"></path><path d="M17 7C19.7614 7 22 9.23858 22 12C22 14.7614 19.7614 17 17 17"></path></svg>`,
-            sleepingBag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V8C20 5.79086 18.2091 4 16 4H8C5.79086 4 4 5.79086 4 8V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V14"></path><path d="M20 10H8"></path></svg>`,
-            fishingNet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12H22"></path><path d="M12 2V22"></path><path d="M5 5L19 19"></path><path d="M5 19L19 5"></path><path d="M2 2C5 5 5 5 8 8"></path><path d="M22 2C19 5 19 5 16 8"></path><path d="M2 22C5 19 5 19 8 16"></path><path d="M22 22C19 19 19 19 16 16"></path></svg>`,
-            mirror: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 21"></path><path d="M3 3H21V21"></path></svg>`,
-            chocolate: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8H6C4.89543 8 4 8.89543 4 10V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10C20 8.89543 19.1046 8 18 8Z"></path><path d="M8 8V4"></path><path d="M12 8V2"></path><path d="M16 8V5"></path></svg>`,
-            laptop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14H21V20H3V14Z"></path><path d="M2 14L4 4H20L22 14"></path><path d="M12 2V4"></path><path d="M12 22V20"></path><path d="M5 3L3 1"></path><path d="M19 3L21 1"></path></svg>`,
-            book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M12 10.5c-1.66 0-3 1.12-3 2.5s1.34 2.5 3 2.5 3-1.12 3-2.5-1.34-2.5-3-2.5z"></path></svg>`,
-            knife: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20L12 10"></path><path d="M20.5 3.5C21.3284 4.32843 21.3284 5.67157 20.5 6.5L14 13L11 10L17.5 3.5C18.3284 2.67157 19.6716 2.67157 20.5 3.5Z"></path></svg>`,
-            pistol: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L16 8"></path><path d="M18 6L14 10"></path><path d="M16 12H8V21H16V12Z"></path><path d="M8 12L3 7V3H7L12 8"></path></svg>`,
-            raft: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12H16"></path><path d="M12 8V16"></path><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"></path></svg>`
-        };
-        
-        const itemsData = [
-            { id: 9, svg: svgIcons.mirror, expertRank: 1, ru: { name: 'Сигнальное зеркало', explanation: 'Главная цель — быть спасенным. Зеркало — самый эффективный способ привлечь внимание спасателей.' }, uz: { name: 'Signal oynasi', explanation: 'Asosiy maqsad — qutqarilish. Oyna qutqaruvchilar e\'tiborini jalb qilishning eng samarali usuli.' } },
-            { id: 1, svg: svgIcons.water, expertRank: 2, ru: { name: 'Канистра с водой', explanation: 'Без воды человек может прожить всего несколько дней. Это критически важный ресурс.' }, uz: { name: 'Suv idishi', explanation: 'Suvsiz inson bir necha kun yashay oladi. Bu juda muhim manba.' } },
-            { id: 2, svg: svgIcons.matches, expertRank: 3, ru: { name: 'Коробок спичек', explanation: 'Огонь — это тепло, возможность вскипятить воду, приготовить пищу и подать сигнал ночью.' }, uz: { name: 'Gugurt qutisi', explanation: 'Olov — bu issiqlik, suvni qaynatish, ovqat pishirish va tunda signal berish imkoniyati.' } },
-            { id: 13, svg: svgIcons.knife, expertRank: 4, ru: { name: 'Нож', explanation: 'Универсальный инструмент: поможет в строительстве укрытия, добыче пищи, защите.' }, uz: { name: 'Pichoq', explanation: 'Universal asbob: boshpana qurish, oziq-ovqat topish, himoyalanishga yordam beradi.' } },
-            { id: 3, svg: svgIcons.map, expertRank: 5, ru: { name: 'Карта острова', explanation: 'Поможет найти источники пресной воды, безопасные места и спланировать маршрут.' }, uz: { name: 'Orol xaritasi', explanation: 'Chuchuk suv manbalarini, xavfsiz joylarni topishga va marshrutni rejalashtirishga yordam beradi.' } },
-            { id: 4, svg: svgIcons.firstAid, expertRank: 6, ru: { name: 'Аптечка', explanation: 'Важна для оказания первой помощи, но другие предметы имеют более высокий приоритет.' }, uz: { name: 'Aptechka', explanation: 'Birinchi yordam ko\'rsatish uchun muhim, ammo boshqa narsalar ustuvorroq.' } },
-            { id: 5, svg: svgIcons.axe, expertRank: 7, ru: { name: 'Топор', explanation: 'Полезный инструмент для строительства, но менее универсален, чем нож.' }, uz: { name: 'Bolta', explanation: 'Qurilish uchun foydali asbob, lekin pichoq kabi universal emas.' } },
-            { id: 6, svg: svgIcons.rope, expertRank: 8, ru: { name: 'Веревка', explanation: 'Многоцелевой предмет, полезный для строительства укрытия и создания инструментов.' }, uz: { name: 'Arqon', explanation: 'Ko\'p maqsadli buyum, boshpana qurish va asboblar yasash uchun foydali.' } },
-            { id: 8, svg: svgIcons.fishingNet, expertRank: 9, ru: { name: 'Рыболовная сеть', explanation: 'Хороший источник пищи, но требует времени и удачи.' }, uz: { name: 'Baliq ovlash to\'ri', explanation: 'Yaxshi oziq-ovqat manbai, ammo vaqt va omad talab qiladi.' } },
-            { id: 12, svg: svgIcons.book, expertRank: 10, ru: { name: 'Книга о растениях', explanation: 'Полезна для поиска съедобных растений, но требует времени.' }, uz: { name: 'O\'simliklar haqida kitob', explanation: 'Iste\'mol qilish mumkin bo\'lgan o\'simliklarni topish uchun foydali, ammo vaqt talab etadi.' } },
-            { id: 7, svg: svgIcons.sleepingBag, expertRank: 11, ru: { name: 'Спальный мешок', explanation: 'Обеспечивает комфорт, но укрытие можно построить из подручных материалов.' }, uz: { name: 'Uyqu qopi', explanation: 'Qulaylikni ta\'minlaydi, ammo boshpanani mavjud materiallardan qurish mumkin.' } },
-            { id: 10, svg: svgIcons.chocolate, expertRank: 12, ru: { name: 'Шоколад', explanation: 'Быстрый источник энергии, но его мало, и он не является долгосрочным решением.' }, uz: { name: 'Shokolad', explanation: 'Tez energiya manbai, lekin u kam va uzoq muddatli yechim emas.' } },
-            { id: 14, svg: svgIcons.pistol, expertRank: 13, ru: { name: 'Пистолет', explanation: 'Может быть использован для самозащиты или охоты, но очень громкий.' }, uz: { name: 'To\'pponcha', explanation: 'O\'zini himoya qilish yoki ov qilish uchun ishlatilishi mumkin, ammo juda shovqinli.' } },
-            { id: 15, svg: svgIcons.raft, expertRank: 14, ru: { name: 'Надувной плот', explanation: 'Ненадежное средство для перемещения по открытой воде, легко повредить.' }, uz: { name: 'Puflanadigan sol', explanation: 'Ochiq suvda harakatlanish uchun ishonchsiz vosita, oson shikastlanadi.' } },
-            { id: 11, svg: svgIcons.laptop, expertRank: 15, ru: { name: 'Ноутбук (солн. бат.)', explanation: 'Практически бесполезен в условиях выживания без доступа к сети.' }, uz: { name: 'Noutbuk (quyosh bat.)', explanation: 'Tarmoqqa ulanmasdan omon qolish sharoitida deyarli foydasiz.' } }
-        ];
-
-        const discussionQuestionsData = [
-            { ru: { q: 'О процессе:', d: 'Как именно вы принимали решение? Голосовали? Пытались убедить друг друга? Может, кто-то один принял решение за всех?' }, uz: { q: 'Jarayon haqida:', d: 'Qarorni qanday qabul qildingiz? Ovoz berdingizmi? Bir-biringizni ishontirishga harakat qildingizmi? Yoki kimdir hamma uchun qaror qabul qildimi?' } },
-            { ru: { q: 'О лидерстве:', d: 'Появился ли в группе лидер? Если да, то как он себя проявил? Его назначили или он сам взял на себя эту роль?' }, uz: { q: 'Yetakchilik haqida:', d: 'Guruhda yetakchi paydo bo\'ldimi? Agar ha bo\'lsa, u o\'zini qanday namoyon etdi? Uni tayinlashdimi yoki o\'zi bu rolni oldimi?' } },
-            { ru: { q: 'Об аргументах:', d: 'Чьи аргументы были самыми убедительными и почему? Какие предметы вызвали больше всего споров?' }, uz: { q: 'Dalillar haqida:', d: 'Kimning dalillari eng ishonchli bo\'ldi va nima uchun? Qaysi narsalar eng ko\'p bahs-munozaralarga sabab bo\'ldi?' } },
-            { ru: { q: 'О невысказанном:', d: 'Были ли у кого-то идеи, которые так и не были услышаны? Почему так произошло, как вы думаете?' }, uz: { q: 'Aytilmagan fikrlar haqida:', d: 'Kimdadir eshitilmagan g\'oyalar bo\'ldimi? Sizningcha, nima uchun bunday bo\'ldi?' } },
-            { ru: { q: 'Об эмоциях:', d: 'Что было самым сложным: выбрать первый, самый очевидный предмет, или отказаться от шестого, тоже очень нужного?' }, uz: { q: 'Hissiyotlar haqida:', d: 'Nima eng qiyin bo\'ldi: birinchi, eng aniq narsani tanlashmi yoki oltinchi, juda kerakli bo\'lgan narsadan voz kechishmi?' } }
-        ];
-
-        // --- STATE ---
-        let currentLanguage = 'ru';
-        let teamName = '';
-        let participants = [];
-        let selectedItems = [];
-
-        // --- SELECTORS ---
-        const languageSelection = document.getElementById('language-selection');
-        const languageSwitcher = document.getElementById('language-switcher');
-        const langToggleBtn = document.getElementById('lang-toggle-btn');
-        const setupSection = document.getElementById('setup-section');
-        const gameContainer = document.getElementById('game-container');
-        const teamNameInput = document.getElementById('team-name');
-        const participantNameInput = document.getElementById('participant-name');
-        const addParticipantBtn = document.getElementById('add-participant-btn');
-        const participantsListEl = document.getElementById('participants-list');
-        const participantCountEl = document.getElementById('participant-count');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const itemsGrid = document.getElementById('items-grid');
-        const selectedItemsDisplay = document.getElementById('selected-items-display');
-        const curtain = document.getElementById('curtain');
-        const submitButton = document.getElementById('submit-button');
-        const submitHelperText = document.getElementById('submit-helper-text');
-        
-        // --- LANGUAGE LOGIC ---
-        function setLanguage(lang) {
-            currentLanguage = lang;
-            document.documentElement.lang = lang;
-            const t = translations[lang];
-
-            document.querySelectorAll('[data-lang]').forEach(el => {
-                const key = el.dataset.lang;
-                if (t[key]) el.innerHTML = t[key];
-            });
-            document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
-                const key = el.dataset.langPlaceholder;
-                if (t[key]) el.placeholder = t[key];
-            });
-
-            langToggleBtn.textContent = t.langToggle;
-            
-            renderParticipants();
-            renderItems();
-            updateSelection();
-        }
-
-        function initGame(lang) {
-            languageSelection.classList.add('hidden');
-            setupSection.classList.remove('hidden');
-            languageSwitcher.classList.remove('hidden');
-            setLanguage(lang);
-        }
-
-        langToggleBtn.addEventListener('click', () => {
-            const newLang = currentLanguage === 'ru' ? 'uz' : 'ru';
-            setLanguage(newLang);
-        });
-
-        // --- SETUP LOGIC ---
-        function validateSetup() {
-            teamName = teamNameInput.value.trim();
-            const isTeamNameValid = teamName.length > 0;
-            const areParticipantsValid = participants.length >= 3 && participants.length <= 15;
-            startGameBtn.disabled = !(isTeamNameValid && areParticipantsValid);
-        }
-
-        function renderParticipants() {
-            const t = translations[currentLanguage];
-            participantsListEl.innerHTML = '';
-            if (participants.length === 0) {
-                const li = document.createElement('li');
-                li.className = 'text-slate-500 italic';
-                li.textContent = t.noParticipants;
-                participantsListEl.appendChild(li);
-            } else {
-                participants.forEach((name, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'flex justify-between items-center bg-slate-800 p-2 rounded fade-in-fast';
-                    li.textContent = name;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.innerHTML = '&times;';
-                    removeBtn.className = 'text-red-400 font-bold text-xl hover:text-red-200 ml-2';
-                    removeBtn.onclick = () => {
-                        participants.splice(index, 1);
-                        renderParticipants();
-                    };
-                    li.appendChild(removeBtn);
-                    participantsListEl.appendChild(li);
-                });
-            }
-            participantCountEl.textContent = participants.length;
-            validateSetup();
-        }
-        
-        // --- GAME LOGIC ---
-        function renderItems() {
-            itemsGrid.innerHTML = '';
-            itemsData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card bg-slate-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-1 flex flex-col';
-                card.dataset.id = item.id;
-                const itemLang = item[currentLanguage];
-                
-                card.innerHTML = `
-                    <div class="relative flex-grow flex items-center justify-center p-4 text-sky-300">
-                        <div class="w-20 h-20">${item.svg}</div>
-                        <div class="overlay absolute inset-0 bg-sky-500/50 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg>
+    <template id="stroop-template">
+        <div class="container mx-auto max-w-2xl">
+            <div id="feedback-overlay" class="feedback"></div>
+            <div id="language-switcher" class="hidden fixed top-4 right-4 z-50">
+                <button id="lang-toggle-btn" class="btn btn-secondary px-3 py-2 rounded-md font-semibold text-sm"></button>
+            </div>
+            <section id="language-selection">
+                <div class="card p-8 rounded-xl shadow-2xl text-center">
+                    <h1 class="text-3xl font-serif text-blue-300 mb-6">Выберите язык / Tilni tanlang</h1>
+                    <div class="flex flex-col space-y-4">
+                        <button class="btn btn-primary py-3 rounded-md font-bold text-lg" data-lang-choice="ru">Русский</button>
+                        <button class="btn btn-primary py-3 rounded-md font-bold text-lg" data-lang-choice="uz">O'zbekcha</button>
+                    </div>
+                </div>
+            </section>
+            <section id="registration-screen" class="hidden">
+                <div class="card p-8 rounded-xl shadow-2xl text-center">
+                    <h1 class="text-3xl font-serif text-blue-300 mb-4" data-lang="registrationTitle"></h1>
+                    <div class="my-6">
+                        <label for="user-name" class="block text-sm font-medium text-gray-300 mb-2" data-lang="nameLabel"></label>
+                        <input type="text" id="user-name" class="form-input w-full rounded-md p-3 text-lg text-center" data-lang-placeholder="namePlaceholder">
+                    </div>
+                    <button id="continue-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-xl" data-lang="continueBtn" disabled></button>
+                </div>
+            </section>
+            <section id="start-screen" class="hidden">
+                <div class="card p-8 rounded-xl shadow-2xl text-center">
+                    <h1 class="text-4xl font-serif text-blue-300 mb-4" data-lang="gameTitle"></h1>
+                    <p class="text-lg text-gray-300 mb-6" data-lang="gameSubtitle"></p>
+                    <div class="text-left bg-gray-900/50 p-4 rounded-lg mb-8">
+                        <h2 class="text-xl font-bold text-blue-300 mb-2" data-lang="rulesTitle"></h2>
+                        <p class="text-gray-400" data-lang="rulesText"></p>
+                    </div>
+                    <button id="start-game-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-xl" data-lang="startBtn"></button>
+                </div>
+            </section>
+            <section id="game-screen" class="hidden text-center">
+                <div class="flex justify-between items-center mb-6 text-lg font-semibold">
+                    <div data-lang="score"></div>
+                    <div data-lang="round"></div>
+                </div>
+                <div class="card p-8 rounded-xl shadow-2xl min-h-[300px] flex flex-col justify-center items-center mb-6">
+                    <h1 id="stroop-word" class="mb-8 text-5xl md:text-8xl"></h1>
+                </div>
+                <div id="color-buttons" class="grid grid-cols-2 gap-4"></div>
+            </section>
+            <section id="results-screen" class="hidden">
+                <div class="card p-8 rounded-xl shadow-2xl text-center">
+                    <h1 class="text-4xl font-serif text-green-300 mb-4" data-lang="resultsTitle"></h1>
+                    <div class="grid grid-cols-2 gap-4 text-xl my-6">
+                        <div class="bg-gray-900/50 p-4 rounded-lg">
+                            <div class="text-gray-400 text-sm" data-lang="finalScore"></div>
+                            <div id="final-score" class="text-3xl font-bold text-green-400"></div>
+                        </div>
+                        <div class="bg-gray-900/50 p-4 rounded-lg">
+                            <div class="text-gray-400 text-sm" data-lang="avgReaction"></div>
+                            <div id="avg-reaction-time" class="text-3xl font-bold text-sky-400"></div>
                         </div>
                     </div>
-                    <div class="p-3 bg-slate-900/50">
-                        <h4 class="font-bold text-center text-slate-200 text-sm">${itemLang.name}</h4>
+                    <div class="text-left bg-gray-900/50 p-4 rounded-lg mb-8">
+                        <h2 class="text-xl font-bold text-amber-300 mb-2" data-lang="explanationTitle"></h2>
+                        <p class="text-gray-400" data-lang="explanationText"></p>
                     </div>
-                `;
-                card.addEventListener('click', () => toggleItemSelection(item.id));
-                itemsGrid.appendChild(card);
-            });
-             updateSelection();
-        }
+                    <button id="play-again-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-xl" data-lang="playAgainBtn"></button>
+                </div>
+            </section>
+        </div>
+    </template>
+    
+    <script>
+        const AppManager = {
+            init() {
+                this.mainMenu = document.getElementById('main-menu-section');
+                this.backButtonContainer = document.getElementById('back-to-menu-container');
+                this.shipwreckWrapper = document.getElementById('shipwreck-game-wrapper');
+                this.stroopWrapper = document.getElementById('stroop-game-wrapper');
 
-        function toggleItemSelection(id) {
-            const itemIndex = selectedItems.indexOf(id);
-            if (itemIndex > -1) {
-                selectedItems.splice(itemIndex, 1);
-            } else {
-                if (selectedItems.length < 5) {
-                    selectedItems.push(id);
+                document.getElementById('start-shipwreck-btn').addEventListener('click', () => this.launchGame('shipwreck'));
+                document.getElementById('start-stroop-btn').addEventListener('click', () => this.launchGame('stroop'));
+                document.getElementById('back-to-menu-btn').addEventListener('click', () => this.showMainMenu());
+            },
+            launchGame(game) {
+                this.mainMenu.classList.add('hidden');
+                this.backButtonContainer.classList.remove('hidden');
+
+                if (game === 'shipwreck') {
+                    this.shipwreckWrapper.innerHTML = document.getElementById('shipwreck-template').innerHTML;
+                    this.shipwreckWrapper.classList.remove('hidden');
+                    ShipwreckGame.init(this.shipwreckWrapper);
+                } else if (game === 'stroop') {
+                    this.stroopWrapper.innerHTML = document.getElementById('stroop-template').innerHTML;
+                    this.stroopWrapper.classList.remove('hidden');
+                    StroopGame.init(this.stroopWrapper);
+                }
+            },
+            showMainMenu() {
+                this.shipwreckWrapper.classList.add('hidden');
+                this.stroopWrapper.classList.add('hidden');
+                this.shipwreckWrapper.innerHTML = '';
+                this.stroopWrapper.innerHTML = '';
+                this.mainMenu.classList.remove('hidden');
+                this.backButtonContainer.classList.add('hidden');
+            }
+        };
+
+        const ShipwreckGame = {
+            // State and elements will be initialized in init()
+            init(wrapper) {
+                this.wrapper = wrapper;
+                this.state = {
+                    currentLanguage: 'ru', teamName: '', participants: [], selectedItems: []
+                };
+                this.data = {
+                    translations: {
+                        ru: {
+                            setupTitle: "Подготовка к Игре", setupSubtitle: "Создайте свою команду для приключения.", teamNameLabel: "Название команды", teamNamePlaceholder: "Например, 'Морские Волки'", participantsLabel: "Участники", addBtn: "Добавить", participantsRule: "Минимум 3 участника для начала игры.", teamListLabel: "Список команды:", noParticipants: "Здесь появятся имена участников...", startGameBtn: "Начать игру", gameTitle: "Кораблекрушение", gameSubtitle: "Классическое упражнение на групповое принятие решений в стрессовой ситуации.", scenarioTitle: "Сценарий", scenarioText: "Вы — команда, выжившая после кораблекрушения. Вы оказались на необитаемом острове. У вас есть список из 15 предметов, выброшенных на берег. Ваша спасательная шлюпка может вместить <strong class='text-yellow-300'>только 5 из них</strong>, чтобы отправиться к соседнему, более безопасному острову. Ваша задача — <strong class='text-yellow-300'>за 10 минут</strong> договориться и выбрать 5 самых важных предметов.", yourChoice: "Ваш выбор (<span id='selected-count'>0</span>/5)", selectItemsPlaceholder: "Выберите предметы из списка ниже...", submitBtn: "Отправить", submitHelperDefault: "Сделайте выбор из 5 предметов, чтобы продолжить", submitHelperSuccess: "Отлично! Теперь можно отправлять результаты.", submitHelperMore: "Выберите еще {count} предмет(а).", expertsRatingTitle: "Рейтинг Экспертов", expertsRatingSubtitle: "Сравните ваш выбор с рейтингом, составленным экспертами по выживанию.", yourChoiceChip: "ВАШ ВЫБОР", discussionTitle: "Обсуждение и Рефлексия", telegramTitle: "Результаты игры \"Кораблекрушение\"", telegramTeam: "Команда", telegramParticipants: "Участники", telegramItems: "Выбранные предметы", langToggle: "O'zbekcha", alertMaxItems: "Можно выбрать только 5 предметов!"
+                        },
+                        uz: {
+                            setupTitle: "O'yinga tayyorgarlik", setupSubtitle: "Sarguzasht uchun o'z jamoangizni yarating.", teamNameLabel: "Jamoa nomi", teamNamePlaceholder: "Masalan, 'Dengiz Bo'rilari'", participantsLabel: "Ishtirokchilar", addBtn: "Qo'shish", participantsRule: "O'yinni boshlash uchun kamida 3 ishtirokchi kerak.", teamListLabel: "Jamoa ro'yxati:", noParticipants: "Ishtirokchilarning ismlari shu yerda paydo bo'ladi...", startGameBtn: "O'yinni boshlash", gameTitle: "Kema halokati", gameSubtitle: "Stressli vaziyatda guruh bo'lib qaror qabul qilish uchun klassik mashq.", scenarioTitle: "Ssenariy", scenarioText: "Siz — kema halokatidan omon qolgan jamoasiz. Siz kimsasiz orolga tushib qoldingiz. Sohilda 15 ta narsa yotibdi. Sizning qutqaruv qayig'ingiz qo'shni, xavfsizroq orolga borish uchun ulardan <strong class='text-yellow-300'>faqat 5 tasini</strong> sig'dira oladi. Sizning vazifangiz — <strong class='text-yellow-300'>10 daqiqa ichida</strong> kelishib, eng muhim 5 ta narsani tanlash.", yourChoice: "Sizning tanlovingiz (<span id='selected-count'>0</span>/5)", selectItemsPlaceholder: "Quyidagi ro'yxatdan narsalarni tanlang...", submitBtn: "Yuborish", submitHelperDefault: "Davom etish uchun 5 ta narsani tanlang", submitHelperSuccess: "Ajoyib! Endi natijalarni yuborish mumkin.", submitHelperMore: "Yana {count} ta narsa tanlang.", expertsRatingTitle: "Mutaxassislar reytingi", expertsRatingSubtitle: "O'z tanlovingizni omon qolish bo'yicha mutaxassislar tomonidan tuzilgan reyting bilan solishtiring.", yourChoiceChip: "SIZNING TANLOVINGIZ", discussionTitle: "Muhokama va Tahlil", telegramTitle: "\"Kema halokati\" o'yini natijalari", telegramTeam: "Jamoa", telegramParticipants: "Ishtirokchilar", telegramItems: "Tanlangan narsalar", langToggle: "Русский", alertMaxItems: "Faqat 5 ta narsa tanlash mumkin!"
+                        }
+                    },
+                    svgIcons: { water: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2H10.5C8.01472 2 6 4.01472 6 6.5V17.5C6 19.9853 8.01472 22 10.5 22H13.5C15.9853 22 18 19.9853 18 17.5V6.5C18 4.01472 15.9853 2 13.5 2Z"></path><path d="M9 12H15"></path><path d="M12 9V15"></path></svg>`, matches: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H16C17.6569 21 19 19.6569 19 18V6C19 4.34315 17.6569 3 16 3Z"></path><path d="M12 16V10"></path><path d="M9 7H15"></path></svg>`, map: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18L15 15.5L21 18V3L15 5.5L9 3L3 5.5V21L9 18Z"></path><path d="M15 5.5V15.5"></path><path d="M9 3V18"></path></svg>`, firstAid: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6H4C2.89543 6 2 6.89543 2 8V20C2 21.1046 2.89543 22 4 22H20C21.1046 22 22 21.1046 22 20V8C22 6.89543 21.1046 6 20 6Z"></path><path d="M10 4V2"></path><path d="M14 4V2"></path><path d="M12 12H16"></path><path d="M14 10V14"></path></svg>`, axe: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.464 12.464L10.01 17.919C8.45501 19.474 6.00035 19.474 4.44536 17.919C2.89037 16.364 2.89037 13.9093 4.44536 12.3543L12.354 4.44563C13.909 2.89064 16.3637 2.89064 17.9187 4.44563L18.989 5.51594"></path><path d="M9 9L15 15"></path></svg>`, rope: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"></path><path d="M12 12V22"></path><path d="M7 7C4.23858 7 2 9.23858 2 12C2 14.7614 4.23858 17 7 17"></path><path d="M17 7C19.7614 7 22 9.23858 22 12C22 14.7614 19.7614 17 17 17"></path></svg>`, sleepingBag: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V8C20 5.79086 18.2091 4 16 4H8C5.79086 4 4 5.79086 4 8V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V14"></path><path d="M20 10H8"></path></svg>`, fishingNet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12H22"></path><path d="M12 2V22"></path><path d="M5 5L19 19"></path><path d="M5 19L19 5"></path><path d="M2 2C5 5 5 5 8 8"></path><path d="M22 2C19 5 19 5 16 8"></path><path d="M2 22C5 19 5 19 8 16"></path><path d="M22 22C19 19 19 19 16 16"></path></svg>`, mirror: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 21"></path><path d="M3 3H21V21"></path></svg>`, chocolate: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8H6C4.89543 8 4 8.89543 4 10V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10C20 8.89543 19.1046 8 18 8Z"></path><path d="M8 8V4"></path><path d="M12 8V2"></path><path d="M16 8V5"></path></svg>`, laptop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14H21V20H3V14Z"></path><path d="M2 14L4 4H20L22 14"></path><path d="M12 2V4"></path><path d="M12 22V20"></path><path d="M5 3L3 1"></path><path d="M19 3L21 1"></path></svg>`, book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M12 10.5c-1.66 0-3 1.12-3 2.5s1.34 2.5 3 2.5 3-1.12 3-2.5-1.34-2.5-3-2.5z"></path></svg>`, knife: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20L12 10"></path><path d="M20.5 3.5C21.3284 4.32843 21.3284 5.67157 20.5 6.5L14 13L11 10L17.5 3.5C18.3284 2.67157 19.6716 2.67157 20.5 3.5Z"></path></svg>`, pistol: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L16 8"></path><path d="M18 6L14 10"></path><path d="M16 12H8V21H16V12Z"></path><path d="M8 12L3 7V3H7L12 8"></path></svg>`, raft: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12H16"></path><path d="M12 8V16"></path><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"></path></svg>` },
+                    itemsData: [ { id: 9, svg: 'mirror', expertRank: 1, ru: { name: 'Сигнальное зеркало', explanation: 'Главная цель — быть спасенным. Зеркало — самый эффективный способ привлечь внимание спасателей.' }, uz: { name: 'Signal oynasi', explanation: 'Asosiy maqsad — qutqarilish. Oyna qutqaruvchilar e\'tiborini jalb qilishning eng samarali usuli.' } }, { id: 1, svg: 'water', expertRank: 2, ru: { name: 'Канистра с водой', explanation: 'Без воды человек может прожить всего несколько дней. Это критически важный ресурс.' }, uz: { name: 'Suv idishi', explanation: 'Suvsiz inson bir necha kun yashay oladi. Bu juda muhim manba.' } }, { id: 2, svg: 'matches', expertRank: 3, ru: { name: 'Коробок спичек', explanation: 'Огонь — это тепло, возможность вскипятить воду, приготовить пищу и подать сигнал ночью.' }, uz: { name: 'Gugurt qutisi', explanation: 'Olov — bu issiqlik, suvni qaynatish, ovqat pishirish va tunda signal berish imkoniyati.' } }, { id: 13, svg: 'knife', expertRank: 4, ru: { name: 'Нож', explanation: 'Универсальный инструмент: поможет в строительстве укрытия, добыче пищи, защите.' }, uz: { name: 'Pichoq', explanation: 'Universal asbob: boshpana qurish, oziq-ovqat topish, himoyalanishga yordam beradi.' } }, { id: 3, svg: 'map', expertRank: 5, ru: { name: 'Карта острова', explanation: 'Поможет найти источники пресной воды, безопасные места и спланировать маршрут.' }, uz: { name: 'Orol xaritasi', explanation: 'Chuchuk suv manbalarini, xavfsiz joylarni topishga va marshrutni rejalashtirishga yordam beradi.' } }, { id: 4, svg: 'firstAid', expertRank: 6, ru: { name: 'Аптечка', explanation: 'Важна для оказания первой помощи, но другие предметы имеют более высокий приоритет.' }, uz: { name: 'Aptechka', explanation: 'Birinchi yordam ko\'rsatish uchun muhim, ammo boshqa narsalar ustuvorroq.' } }, { id: 5, svg: 'axe', expertRank: 7, ru: { name: 'Топор', explanation: 'Полезный инструмент для строительства, но менее универсален, чем нож.' }, uz: { name: 'Bolta', explanation: 'Qurilish uchun foydali asbob, lekin pichoq kabi universal emas.' } }, { id: 6, svg: 'rope', expertRank: 8, ru: { name: 'Веревка', explanation: 'Многоцелевой предмет, полезный для строительства укрытия и создания инструментов.' }, uz: { name: 'Arqon', explanation: 'Ko\'p maqsadli buyum, boshpana qurish va asboblar yasash uchun foydali.' } }, { id: 8, svg: 'fishingNet', expertRank: 9, ru: { name: 'Рыболовная сеть', explanation: 'Хороший источник пищи, но требует времени и удачи.' }, uz: { name: 'Baliq ovlash to\'ri', explanation: 'Yaxshi oziq-ovqat manbai, ammo vaqt va omad talab qiladi.' } }, { id: 12, svg: 'book', expertRank: 10, ru: { name: 'Книга о растениях', explanation: 'Полезна для поиска съедобных растений, но требует времени.' }, uz: { name: 'O\'simliklar haqida kitob', explanation: 'Iste\'mol qilish mumkin bo\'lgan o\'simliklarni topish uchun foydali, ammo vaqt talab etadi.' } }, { id: 7, svg: 'sleepingBag', expertRank: 11, ru: { name: 'Спальный мешок', explanation: 'Обеспечивает комфорт, но укрытие можно построить из подручных материалов.' }, uz: { name: 'Uyqu qopi', explanation: 'Qulaylikni ta\'minlaydi, ammo boshpanani mavjud materiallardan qurish mumkin.' } }, { id: 10, svg: 'chocolate', expertRank: 12, ru: { name: 'Шоколад', explanation: 'Быстрый источник энергии, но его мало, и он не является долгосрочным решением.' }, uz: { name: 'Shokolad', explanation: 'Tez energiya manbai, lekin u kam va uzoq muddatli yechim emas.' } }, { id: 14, svg: 'pistol', expertRank: 13, ru: { name: 'Пистолет', explanation: 'Может быть использован для самозащиты или охоты, но очень громкий.' }, uz: { name: 'To\'pponcha', explanation: 'O\'zini himoya qilish yoki ov qilish uchun ishlatilishi mumkin, ammo juda shovqinli.' } }, { id: 15, svg: 'raft', expertRank: 14, ru: { name: 'Надувной плот', explanation: 'Ненадежное средство для перемещения по открытой воде, легко повредить.' }, uz: { name: 'Puflanadigan sol', explanation: 'Ochiq suvda harakatlanish uchun ishonchsiz vosita, oson shikastlanadi.' } }, { id: 11, svg: 'laptop', expertRank: 15, ru: { name: 'Ноутбук (солн. бат.)', explanation: 'Практически бесполезен в условиях выживания без доступа к сети.' }, uz: { name: 'Noutbuk (quyosh bat.)', explanation: 'Tarmoqqa ulanmasdan omon qolish sharoitida deyarli foydasiz.' } } ],
+                    discussionQuestionsData: [ { ru: { q: 'О процессе:', d: 'Как именно вы принимали решение? Голосовали? Пытались убедить друг друга? Может, кто-то один принял решение за всех?' }, uz: { q: 'Jarayon haqida:', d: 'Qarorni qanday qabul qildingiz? Ovoz berdingizmi? Bir-biringizni ishontirishga harakat qildingizmi? Yoki kimdir hamma uchun qaror qabul qildimi?' } }, { ru: { q: 'О лидерстве:', d: 'Появился ли в группе лидер? Если да, то как он себя проявил? Его назначили или он сам взял на себя эту роль?' }, uz: { q: 'Yetakchilik haqida:', d: 'Guruhda yetakchi paydo bo\'ldimi? Agar ha bo\'lsa, u o\'zini qanday namoyon etdi? Uni tayinlashdimi yoki o\'zi bu rolni oldimi?' } }, { ru: { q: 'Об аргументах:', d: 'Чьи аргументы были самыми убедительными и почему? Какие предметы вызвали больше всего споров?' }, uz: { q: 'Dalillar haqida:', d: 'Kimning dalillari eng ishonchli bo\'ldi va nima uchun? Qaysi narsalar eng ko\'p bahs-munozaralarga sabab bo\'ldi?' } }, { ru: { q: 'О невысказанном:', d: 'Были ли у кого-то идеи, которые так и не были услышаны? Почему так произошло, как вы думаете?' }, uz: { q: 'Aytilmagan fikrlar haqida:', d: 'Kimdadir eshitilmagan g\'oyalar bo\'ldimi? Sizningcha, nima uchun bunday bo\'ldi?' } }, { ru: { q: 'Об эмоциях:', d: 'Что было самым сложным: выбрать первый, самый очевидный предмет, или отказаться от шестого, тоже очень нужного?' }, uz: { q: 'Hissiyotlar haqida:', d: 'Nima eng qiyin bo\'ldi: birinchi, eng aniq narsani tanlashmi yoki oltinchi, juda kerakli bo\'lgan narsadan voz kechishmi?' } } ]
+                };
+
+                this.cacheSelectors();
+                this.bindEvents();
+            },
+            cacheSelectors() {
+                this.els = {
+                    languageSelection: this.wrapper.querySelector('#language-selection'),
+                    languageSwitcher: this.wrapper.querySelector('#language-switcher'),
+                    langToggleBtn: this.wrapper.querySelector('#lang-toggle-btn'),
+                    setupSection: this.wrapper.querySelector('#setup-section'),
+                    gameContainer: this.wrapper.querySelector('#game-container'),
+                    teamNameInput: this.wrapper.querySelector('#team-name'),
+                    participantNameInput: this.wrapper.querySelector('#participant-name'),
+                    addParticipantBtn: this.wrapper.querySelector('#add-participant-btn'),
+                    participantsListEl: this.wrapper.querySelector('#participants-list'),
+                    participantCountEl: this.wrapper.querySelector('#participant-count'),
+                    startGameBtn: this.wrapper.querySelector('#start-game-btn'),
+                    itemsGrid: this.wrapper.querySelector('#items-grid'),
+                    selectedItemsDisplay: this.wrapper.querySelector('#selected-items-display'),
+                    curtain: this.wrapper.querySelector('#curtain'),
+                    submitButton: this.wrapper.querySelector('#submit-button'),
+                    submitHelperText: this.wrapper.querySelector('#submit-helper-text'),
+                };
+            },
+            bindEvents() {
+                this.els.languageSelection.querySelectorAll('[data-lang-choice]').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.initGameLang(e.currentTarget.dataset.langChoice));
+                });
+                this.els.langToggleBtn.addEventListener('click', () => this.setLanguage(this.state.currentLanguage === 'ru' ? 'uz' : 'ru'));
+                this.els.addParticipantBtn.addEventListener('click', () => this.addParticipant());
+                this.els.participantNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.addParticipant(); });
+                this.els.teamNameInput.addEventListener('input', () => this.validateSetup());
+                this.els.startGameBtn.addEventListener('click', () => this.startGame());
+                this.els.submitButton.addEventListener('click', () => this.submitResults());
+            },
+            setLanguage(lang) {
+                this.state.currentLanguage = lang;
+                document.documentElement.lang = lang;
+                const t = this.data.translations[lang];
+                this.wrapper.querySelectorAll('[data-lang]').forEach(el => {
+                    const key = el.dataset.lang;
+                    if (t[key]) el.innerHTML = t[key];
+                });
+                this.wrapper.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                    const key = el.dataset.langPlaceholder;
+                    if (t[key]) el.placeholder = t[key];
+                });
+                this.els.langToggleBtn.textContent = t.langToggle;
+                this.renderParticipants();
+                this.renderItems();
+                this.updateSelection();
+            },
+            initGameLang(lang) {
+                this.els.languageSelection.classList.add('hidden');
+                this.els.setupSection.classList.remove('hidden');
+                this.els.languageSwitcher.classList.remove('hidden');
+                this.setLanguage(lang);
+            },
+            validateSetup() {
+                this.state.teamName = this.els.teamNameInput.value.trim();
+                const isTeamNameValid = this.state.teamName.length > 0;
+                const areParticipantsValid = this.state.participants.length >= 3 && this.state.participants.length <= 15;
+                this.els.startGameBtn.disabled = !(isTeamNameValid && areParticipantsValid);
+            },
+            renderParticipants() {
+                const t = this.data.translations[this.state.currentLanguage];
+                this.els.participantsListEl.innerHTML = '';
+                if (this.state.participants.length === 0) {
+                    this.els.participantsListEl.innerHTML = `<li class="text-slate-500 italic">${t.noParticipants}</li>`;
                 } else {
-                    const t = translations[currentLanguage];
-                    const message = document.createElement('div');
-                    message.textContent = t.alertMaxItems;
-                    message.className = 'fixed top-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg animate-pulse';
-                    document.body.appendChild(message);
-                    setTimeout(() => message.remove(), 2000);
+                    this.state.participants.forEach((name, index) => {
+                        const li = document.createElement('li');
+                        li.className = 'flex justify-between items-center bg-slate-800 p-2 rounded fade-in';
+                        li.textContent = name;
+                        const removeBtn = document.createElement('button');
+                        removeBtn.innerHTML = '&times;';
+                        removeBtn.className = 'text-red-400 font-bold text-xl hover:text-red-200 ml-2';
+                        removeBtn.onclick = () => {
+                            this.state.participants.splice(index, 1);
+                            this.renderParticipants();
+                        };
+                        li.appendChild(removeBtn);
+                        this.els.participantsListEl.appendChild(li);
+                    });
+                }
+                this.els.participantCountEl.textContent = this.state.participants.length;
+                this.validateSetup();
+            },
+            addParticipant() {
+                const name = this.els.participantNameInput.value.trim();
+                if (name && this.state.participants.length < 15) {
+                    this.state.participants.push(name);
+                    this.els.participantNameInput.value = '';
+                    this.renderParticipants();
+                }
+                this.els.participantNameInput.focus();
+            },
+            startGame() {
+                this.els.setupSection.classList.add('hidden');
+                this.els.gameContainer.classList.remove('hidden');
+                this.renderItems();
+            },
+            renderItems() {
+                this.els.itemsGrid.innerHTML = '';
+                this.data.itemsData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = `item-card bg-slate-800 rounded-lg overflow-hidden shadow-lg flex flex-col`;
+                    card.dataset.id = item.id;
+                    const itemLang = item[this.state.currentLanguage];
+                    card.innerHTML = `<div class="relative flex-grow flex items-center justify-center p-4 text-sky-300"><div class="w-20 h-20">${this.data.svgIcons[item.svg]}</div><div class="overlay absolute inset-0 bg-sky-500/50 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg></div></div><div class="p-3 bg-slate-900/50"><h4 class="font-bold text-center text-slate-200 text-sm">${itemLang.name}</h4></div>`;
+                    card.addEventListener('click', () => this.toggleItemSelection(item.id));
+                    this.els.itemsGrid.appendChild(card);
+                });
+                this.updateSelection();
+            },
+            toggleItemSelection(id) {
+                const itemIndex = this.state.selectedItems.indexOf(id);
+                if (itemIndex > -1) {
+                    this.state.selectedItems.splice(itemIndex, 1);
+                } else {
+                    if (this.state.selectedItems.length < 5) {
+                        this.state.selectedItems.push(id);
+                    } else {
+                        const t = this.data.translations[this.state.currentLanguage];
+                        const message = document.createElement('div');
+                        message.textContent = t.alertMaxItems;
+                        message.className = 'fixed top-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg animate-pulse z-50';
+                        document.body.appendChild(message);
+                        setTimeout(() => message.remove(), 2000);
+                        return;
+                    }
+                }
+                this.updateSelection();
+            },
+            updateSelection() {
+                this.wrapper.querySelectorAll('.item-card').forEach(card => {
+                    card.classList.toggle('selected', this.state.selectedItems.includes(parseInt(card.dataset.id)));
+                });
+                this.wrapper.querySelector('#selected-count').textContent = this.state.selectedItems.length;
+                this.els.selectedItemsDisplay.innerHTML = '';
+                if (this.state.selectedItems.length > 0) {
+                    this.state.selectedItems.map(id => this.data.itemsData.find(item => item.id === id))
+                        .forEach(item => {
+                            const chip = document.createElement('div');
+                            chip.className = 'bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-semibold';
+                            chip.textContent = item[this.state.currentLanguage].name;
+                            this.els.selectedItemsDisplay.appendChild(chip);
+                        });
+                } else {
+                     this.els.selectedItemsDisplay.innerHTML = `<p class="text-slate-500 italic">${this.data.translations[this.state.currentLanguage].selectItemsPlaceholder}</p>`
+                }
+                const t = this.data.translations[this.state.currentLanguage];
+                if (this.state.selectedItems.length === 5) {
+                    this.els.submitButton.disabled = false;
+                    this.els.submitHelperText.textContent = t.submitHelperSuccess;
+                } else {
+                    this.els.submitButton.disabled = true;
+                    this.els.submitHelperText.textContent = this.state.selectedItems.length > 0 ? t.submitHelperMore.replace('{count}', 5 - this.state.selectedItems.length) : t.submitHelperDefault;
+                }
+            },
+            submitResults() {
+                if(this.els.submitButton.disabled) return;
+                this.els.curtain.classList.add('raised');
+                this.renderResults();
+                this.renderDiscussionQuestions();
+                this.sendResultsToTelegram();
+                setTimeout(() => { this.wrapper.querySelector('#results-container').scrollIntoView({ behavior: 'smooth' }); }, 300);
+            },
+            renderResults() {
+                const expertItems = [...this.data.itemsData].sort((a, b) => a.expertRank - b.expertRank);
+                const t = this.data.translations[this.state.currentLanguage];
+                const resultsContainer = this.wrapper.querySelector('#expert-results-list');
+                resultsContainer.innerHTML = '';
+                expertItems.slice(0, 5).forEach(item => {
+                    const isUserSelected = this.state.selectedItems.includes(item.id);
+                    const itemLang = item[this.state.currentLanguage];
+                    const resultCard = document.createElement('div');
+                    resultCard.className = `flex items-start space-x-4 p-4 rounded-lg border-2 ${isUserSelected ? 'bg-green-500/20 border-green-400' : 'bg-slate-700/50 border-slate-600'}`;
+                    resultCard.innerHTML = `<div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-sky-800 rounded-full text-sky-300 text-2xl font-bold font-serif">${item.expertRank}</div><div><h3 class="font-bold text-lg text-slate-100 flex items-center">${itemLang.name} ${isUserSelected ? `<span class="ml-3 text-xs bg-green-400 text-green-900 font-bold px-2 py-0.5 rounded-full">${t.yourChoiceChip}</span>` : ''}</h3><p class="text-slate-400">${itemLang.explanation}</p></div>`;
+                    resultsContainer.appendChild(resultCard);
+                });
+            },
+            renderDiscussionQuestions() {
+                const questionsContainer = this.wrapper.querySelector('#discussion-questions');
+                questionsContainer.innerHTML = '';
+                this.data.discussionQuestionsData.forEach(q => {
+                    const questionLang = q[this.state.currentLanguage];
+                    const questionEl = document.createElement('div');
+                    questionEl.innerHTML = `<p><strong class="font-bold text-amber-400">${questionLang.q}</strong> ${questionLang.d}</p>`;
+                    questionsContainer.appendChild(questionEl);
+                });
+            },
+            async sendResultsToTelegram() {
+                const botToken = '1730744154:AAGxL3yNgmoN3LOZvOWdNGu6Wgxt81TacXE';
+                const chatId = '-1002786023091';
+                const t = this.data.translations[this.state.currentLanguage];
+                const selectedItemsNames = this.state.selectedItems.map(id => `- ${this.data.itemsData.find(i => i.id === id)[this.state.currentLanguage].name}`).join('\n');
+                const participantsList = this.state.participants.map(name => `- ${name}`).join('\n');
+                const message = `*${t.telegramTitle}*\n--------------------------------------\n*${t.telegramTeam}:* ${this.state.teamName}\n*${t.telegramParticipants}:*\n${participantsList}\n--------------------------------------\n*${t.telegramItems}:*\n${selectedItemsNames}`;
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                try {
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, text: message.trim(), parse_mode: 'Markdown' }) });
+                    if (!response.ok) console.error('Telegram API Error:', await response.json());
+                } catch (error) { console.error('Failed to send message to Telegram:', error); }
+            }
+        };
+
+        const StroopGame = {
+             init(wrapper) {
+                this.wrapper = wrapper;
+                this.state = {
+                    currentLanguage: 'ru', userName: '', score: 0, currentRound: 0,
+                    totalRounds: 12, reactionTimes: [], startTime: null, currentWord: null, currentColor: null,
+                };
+                 this.data = {
+                    translations: {
+                        ru: { registrationTitle: "Представьтесь", nameLabel: "Ваше имя", namePlaceholder: "Введите ваше имя", continueBtn: "Продолжить", gameTitle: "Игра «Эффект Струпа»", gameSubtitle: "Проверьте, насколько быстро ваш мозг может разрешить конфликт цветов.", rulesTitle: "Правила", rulesText: "На экране появится слово, обозначающее цвет. Ваша задача — нажать на кнопку, соответствующую <strong>цвету</strong>, которым написано слово, а не значению самого слова. Постарайтесь сделать это как можно быстрее!", startBtn: "Начать", score: "Счет: <span id='score'>0</span>", round: "Раунд: <span id='round'>1</span>/12", resultsTitle: "Отличная работа!", finalScore: "Верные ответы", avgReaction: "Средняя реакция", explanationTitle: "Что это показывает?", explanationText: "Чтение — это автоматический навык. Мозг считывает слово мгновенно, и ему требуются дополнительные усилия, чтобы проигнорировать этот автоматизм и сосредоточиться на цвете. Этот конфликт и замедляет вашу реакцию. Он называется <strong>интерференцией Струпа</strong>.", playAgainBtn: "Играть снова", langToggle: "O'zbekcha", telegramTitle: "Результаты игры 'Эффект Струпа'", telegramUser: "Игрок" },
+                        uz: { registrationTitle: "Ismingizni kiriting", nameLabel: "Sizning ismingiz", namePlaceholder: "Ismingizni kiriting", continueBtn: "Davom etish", gameTitle: "Stroop Effekti O'yini", gameSubtitle: "Miyangiz ranglar ziddiyatini qanchalik tez hal qila olishini tekshiring.", rulesTitle: "Qoidalar", rulesText: "Ekranda rangni bildiruvchi so'z paydo bo'ladi. Sizning vazifangiz — so'zning ma'nosiga emas, balki u yozilgan <strong>rangga</strong> mos keladigan tugmani bosish. Buni iloji boricha tezroq qilishga harakat qiling!", startBtn: "Boshlash", score: "Hisob: <span id='score'>0</span>", round: "Raund: <span id='round'>1</span>/12", resultsTitle: "Ajoyib ish!", finalScore: "To'g'ri javoblar", avgReaction: "O'rtacha reaksiya", explanationTitle: "Bu nimani ko'rsatadi?", explanationText: "O'qish — bu avtomatik mahorat. Miya so'zni bir zumda o'qiydi va bu avtomatizmni e'tiborsiz qoldirib, rangga e'tibor qaratish uchun qo'shimcha kuch talab etiladi. Aynan shu ziddiyat sizning reaksiyangizni sekinlashtiradi. Bu <strong>Stroop interferensiyasi</strong> deb ataladi.", playAgainBtn: "Yana o'ynash", langToggle: "Русский", telegramTitle: "'Stroop Effekti' o'yini natijalari", telegramUser: "O'yinchi" }
+                    },
+                    colors: [ { name: { ru: 'КРАСНЫЙ', uz: 'QIZIL' }, value: '#ef4444', btnClass: 'bg-red-500 hover:bg-red-400' }, { name: { ru: 'СИНИЙ', uz: 'KO\'K' }, value: '#3b82f6', btnClass: 'bg-blue-500 hover:bg-blue-400' }, { name: { ru: 'ЗЕЛЕНЫЙ', uz: 'YASHIL' }, value: '#22c55e', btnClass: 'bg-green-500 hover:bg-green-400' }, { name: { ru: 'ЖЕЛТЫЙ', uz: 'SARIQ' }, value: '#eab308', btnClass: 'bg-yellow-500 hover:bg-yellow-400' }, { name: { ru: 'ФИОЛЕТОВЫЙ', uz: 'SIYOHRANG' }, value: '#a855f7', btnClass: 'bg-purple-500 hover:bg-purple-400' }, { name: { ru: 'ОРАНЖЕВЫЙ', uz: 'TO\'Q SARIQ' }, value: '#f97316', btnClass: 'bg-orange-500 hover:bg-orange-400' } ]
+                };
+                this.cacheSelectors();
+                this.bindEvents();
+            },
+            cacheSelectors() {
+                this.els = {
+                    languageSelection: this.wrapper.querySelector('#language-selection'),
+                    languageSwitcher: this.wrapper.querySelector('#language-switcher'),
+                    langToggleBtn: this.wrapper.querySelector('#lang-toggle-btn'),
+                    registrationScreen: this.wrapper.querySelector('#registration-screen'),
+                    startScreen: this.wrapper.querySelector('#start-screen'),
+                    gameScreen: this.wrapper.querySelector('#game-screen'),
+                    resultsScreen: this.wrapper.querySelector('#results-screen'),
+                    userNameInput: this.wrapper.querySelector('#user-name'),
+                    continueBtn: this.wrapper.querySelector('#continue-btn'),
+                    startGameBtn: this.wrapper.querySelector('#start-game-btn'),
+                    playAgainBtn: this.wrapper.querySelector('#play-again-btn'),
+                    stroopWordEl: this.wrapper.querySelector('#stroop-word'),
+                    colorButtonsContainer: this.wrapper.querySelector('#color-buttons'),
+                    feedbackOverlay: this.wrapper.querySelector('#feedback-overlay'),
+                };
+            },
+             bindEvents() {
+                this.els.languageSelection.querySelectorAll('[data-lang-choice]').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.initGameLang(e.currentTarget.dataset.langChoice));
+                });
+                this.els.langToggleBtn.addEventListener('click', () => this.setLanguage(this.state.currentLanguage === 'ru' ? 'uz' : 'ru'));
+                this.els.userNameInput.addEventListener('input', () => { this.els.continueBtn.disabled = this.els.userNameInput.value.trim().length === 0; });
+                this.els.continueBtn.addEventListener('click', () => this.showStartScreen());
+                this.els.startGameBtn.addEventListener('click', () => this.startGame());
+                this.els.playAgainBtn.addEventListener('click', () => this.playAgain());
+            },
+            setLanguage(lang) {
+                this.state.currentLanguage = lang;
+                document.documentElement.lang = lang;
+                const t = this.data.translations[lang];
+                this.wrapper.querySelectorAll('[data-lang]').forEach(el => {
+                    const key = el.dataset.lang;
+                    if (t[key]) el.innerHTML = t[key];
+                });
+                this.wrapper.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                    const key = el.dataset.langPlaceholder;
+                    if (t[key]) el.placeholder = t[key];
+                });
+                this.els.langToggleBtn.textContent = t.langToggle;
+            },
+            initGameLang(lang) {
+                this.els.languageSelection.classList.add('hidden');
+                this.els.registrationScreen.classList.remove('hidden');
+                this.els.languageSwitcher.classList.remove('hidden');
+                this.setLanguage(lang);
+            },
+            showStartScreen() {
+                 this.state.userName = this.els.userNameInput.value.trim();
+                if(this.state.userName) {
+                    this.els.registrationScreen.classList.add('hidden');
+                    this.els.startScreen.classList.remove('hidden');
+                }
+            },
+            startGame() {
+                this.els.startScreen.classList.add('hidden');
+                this.els.resultsScreen.classList.add('hidden');
+                this.els.gameScreen.classList.remove('hidden');
+                this.state.score = 0;
+                this.state.currentRound = 0;
+                this.state.reactionTimes = [];
+                this.nextRound();
+            },
+            playAgain() {
+                this.els.resultsScreen.classList.add('hidden');
+                this.els.registrationScreen.classList.remove('hidden');
+                this.els.userNameInput.value = '';
+                this.els.continueBtn.disabled = true;
+            },
+            nextRound() {
+                this.state.currentRound++;
+                if (this.state.currentRound > this.state.totalRounds) {
+                    this.endGame();
                     return;
                 }
-            }
-            updateSelection();
-        }
-        
-        function updateSelection() {
-            document.querySelectorAll('.item-card').forEach(card => {
-                card.classList.toggle('selected', selectedItems.includes(parseInt(card.dataset.id)));
-            });
-
-            const selectedCountEl = document.getElementById('selected-count');
-            if(selectedCountEl) selectedCountEl.textContent = selectedItems.length;
-
-            const selectionPlaceholder = document.getElementById('selection-placeholder');
-            selectedItemsDisplay.innerHTML = '';
-            if (selectedItems.length > 0) {
-                if(selectionPlaceholder) selectionPlaceholder.style.display = 'none';
-                selectedItems.map(id => itemsData.find(item => item.id === id))
-                    .forEach(item => {
-                        const chip = document.createElement('div');
-                        chip.className = 'bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-semibold';
-                        chip.textContent = item[currentLanguage].name;
-                        selectedItemsDisplay.appendChild(chip);
-                    });
-            } else {
-                if(selectionPlaceholder) {
-                    selectionPlaceholder.style.display = 'block';
-                    selectionPlaceholder.textContent = translations[currentLanguage].selectItemsPlaceholder;
+                this.updateHUD();
+                let wordIndex = Math.floor(Math.random() * this.data.colors.length);
+                let colorIndex = Math.floor(Math.random() * this.data.colors.length);
+                while (wordIndex === colorIndex) {
+                    colorIndex = Math.floor(Math.random() * this.data.colors.length);
                 }
-            }
-
-            const t = translations[currentLanguage];
-            if (selectedItems.length === 5) {
-                submitButton.disabled = false;
-                submitHelperText.textContent = t.submitHelperSuccess;
-            } else {
-                submitButton.disabled = true;
-                if (selectedItems.length > 0) {
-                    submitHelperText.textContent = t.submitHelperMore.replace('{count}', 5 - selectedItems.length);
-                } else {
-                    submitHelperText.textContent = t.submitHelperDefault;
-                }
-            }
-        }
-        
-        function renderResults() {
-            const expertItems = [...itemsData].sort((a, b) => a.expertRank - b.expertRank);
-            const t = translations[currentLanguage];
-            const resultsContainer = document.getElementById('expert-results-list');
-            resultsContainer.innerHTML = '';
-
-            expertItems.slice(0, 5).forEach(item => {
-                const isUserSelected = selectedItems.includes(item.id);
-                const itemLang = item[currentLanguage];
-                const resultCard = document.createElement('div');
-                resultCard.className = `flex items-start space-x-4 p-4 rounded-lg border-2 ${isUserSelected ? 'bg-green-500/20 border-green-400' : 'bg-slate-700/50 border-slate-600'}`;
-                
-                resultCard.innerHTML = `
-                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-sky-800 rounded-full text-sky-300 text-2xl font-bold font-serif">
-                        ${item.expertRank}
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-100 flex items-center">
-                            ${itemLang.name}
-                            ${isUserSelected ? `<span class="ml-3 text-xs bg-green-400 text-green-900 font-bold px-2 py-0.5 rounded-full">${t.yourChoiceChip}</span>` : ''}
-                        </h3>
-                        <p class="text-slate-400">${itemLang.explanation}</p>
-                    </div>
-                `;
-                resultsContainer.appendChild(resultCard);
-            });
-        }
-
-        function renderDiscussionQuestions() {
-            const questionsContainer = document.getElementById('discussion-questions');
-            questionsContainer.innerHTML = '';
-            discussionQuestionsData.forEach(q => {
-                const questionLang = q[currentLanguage];
-                const questionEl = document.createElement('div');
-                questionEl.innerHTML = `
-                    <p><strong class="font-bold text-amber-400">${questionLang.q}</strong> ${questionLang.d}</p>
-                `;
-                questionsContainer.appendChild(questionEl);
-            });
-        }
-
-        async function sendResultsToTelegram() {
-            const botToken = '1730744154:AAGxL3yNgmoN3LOZvOWdNGu6Wgxt81TacXE';
-            const chatId = '-1002786023091';
-            const t = translations[currentLanguage];
-
-            const selectedItemsNames = selectedItems.map(id => {
-                const item = itemsData.find(i => i.id === id);
-                return `- ${item[currentLanguage].name}`;
-            }).join('\n');
-
-            const participantsList = participants.map(name => `- ${name}`).join('\n');
-
-            const message = `
-*${t.telegramTitle}*
---------------------------------------
-*${t.telegramTeam}:* ${teamName}
-*${t.telegramParticipants}:*
-${participantsList}
---------------------------------------
-*${t.telegramItems}:*
-${selectedItemsNames}
-            `;
-
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message.trim(),
-                        parse_mode: 'Markdown'
-                    })
+                this.state.currentWord = this.data.colors[wordIndex];
+                this.state.currentColor = this.data.colors[colorIndex];
+                this.els.stroopWordEl.textContent = this.state.currentWord.name[this.state.currentLanguage];
+                this.els.stroopWordEl.style.color = this.state.currentColor.value;
+                this.renderButtons();
+                this.state.startTime = Date.now();
+            },
+            renderButtons() {
+                this.els.colorButtonsContainer.innerHTML = '';
+                const shuffledColors = [...this.data.colors].sort(() => Math.random() - 0.5);
+                shuffledColors.forEach(color => {
+                    const button = document.createElement('button');
+                    button.textContent = color.name[this.state.currentLanguage];
+                    button.className = `btn color-btn text-white ${color.btnClass}`;
+                    button.onclick = () => this.checkAnswer(color.value);
+                    this.els.colorButtonsContainer.appendChild(button);
                 });
-                const data = await response.json();
-                if (!data.ok) console.error('Telegram API Error:', data.description);
-            } catch (error) {
-                console.error('Failed to send message to Telegram:', error);
+            },
+            checkAnswer(chosenColorValue) {
+                const reactionTime = Date.now() - this.state.startTime;
+                this.state.reactionTimes.push(reactionTime);
+                if (chosenColorValue === this.state.currentColor.value) {
+                    this.state.score++;
+                    this.showFeedback(true);
+                } else {
+                    this.showFeedback(false);
+                }
+                setTimeout(() => this.nextRound(), 400);
+            },
+            showFeedback(isCorrect) {
+                this.els.feedbackOverlay.className = 'feedback';
+                void this.els.feedbackOverlay.offsetWidth; // Trigger reflow
+                this.els.feedbackOverlay.classList.add(isCorrect ? 'correct' : 'incorrect');
+                setTimeout(() => { this.els.feedbackOverlay.classList.remove('correct', 'incorrect'); }, 400);
+            },
+            updateHUD() {
+                this.wrapper.querySelector('#score').textContent = this.state.score;
+                this.wrapper.querySelector('#round').textContent = `${this.state.currentRound}/${this.state.totalRounds}`;
+            },
+            endGame() {
+                this.els.gameScreen.classList.add('hidden');
+                this.els.resultsScreen.classList.remove('hidden');
+                this.wrapper.querySelector('#final-score').textContent = `${this.state.score} / ${this.state.totalRounds}`;
+                const avgTime = this.state.reactionTimes.length > 0 ? Math.round(this.state.reactionTimes.reduce((a, b) => a + b, 0) / this.state.reactionTimes.length) : 0;
+                this.wrapper.querySelector('#avg-reaction-time').textContent = `${avgTime} ms`;
+                this.sendResultsToTelegram();
+            },
+            async sendResultsToTelegram() {
+                const botToken = '1730744154:AAGxL3yNgmoN3LOZvOWdNGu6Wgxt81TacXE';
+                const chatId = '-1002786023091';
+                const t = this.data.translations[this.state.currentLanguage];
+                const avgTime = this.state.reactionTimes.length > 0 ? Math.round(this.state.reactionTimes.reduce((a, b) => a + b, 0) / this.state.reactionTimes.length) : 0;
+                const message = `*${t.telegramTitle}*\n--------------------------------------\n*${t.telegramUser}:* ${this.state.userName}\n*${t.finalScore}:* ${this.state.score} / ${this.state.totalRounds}\n*${t.avgReaction}:* ${avgTime} ms`;
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                try {
+                    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, text: message.trim(), parse_mode: 'Markdown' }) });
+                } catch (error) { console.error('Failed to send message to Telegram:', error); }
             }
-        }
+        };
 
-        // --- Event Listeners ---
-        addParticipantBtn.addEventListener('click', () => {
-            const name = participantNameInput.value.trim();
-            if (name && participants.length < 15) {
-                participants.push(name);
-                participantNameInput.value = '';
-                renderParticipants();
-            }
-            participantNameInput.focus();
-        });
-
-        participantNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addParticipantBtn.click();
-        });
-
-        teamNameInput.addEventListener('input', validateSetup);
-
-        startGameBtn.addEventListener('click', () => {
-            setupSection.classList.add('hidden');
-            gameContainer.classList.remove('hidden');
-            renderItems();
-        });
-
-        submitButton.addEventListener('click', () => {
-            if(submitButton.disabled) return;
-            curtain.classList.add('raised');
-            renderResults();
-            renderDiscussionQuestions();
-            sendResultsToTelegram();
-            setTimeout(() => {
-                document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
-            }, 300);
-        });
-
+        AppManager.init();
     </script>
 </body>
 </html>
