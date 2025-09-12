@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игра «Кораблекрушение»</title>
+    <title>Игра «Кораблекрушение» / Kema halokati o'yini</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,28 +61,11 @@
         #curtain.raised {
             transform: translateY(-100%);
         }
-        .curtain-handle {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .curtain-handle:hover {
-             transform: scale(1.1);
-        }
-        .curtain-handle span {
-            animation: bounce 2s infinite;
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-15px); }
-            60% { transform: translateY(-8px); }
-        }
         .fade-in {
-            animation: fadeIn 1.5s ease-in-out forwards;
-            opacity: 0;
+            animation: fadeIn 1s ease-in-out forwards;
         }
         .fade-in-fast {
             animation: fadeIn 0.5s ease-in-out forwards;
-            opacity: 0;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -100,116 +83,95 @@
         .btn {
             transition: all 0.2s ease-in-out;
         }
-        .btn-primary {
-            background-color: #0ea5e9;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #38bdf8;
-        }
-        .btn-secondary {
-            background-color: #334155;
-            color: #94a3b8;
-        }
-        .btn-secondary:hover {
-            background-color: #475569;
-        }
-        .btn:disabled {
-            background-color: #475569;
-            color: #64748b;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
+        .btn-primary { background-color: #0ea5e9; color: white; }
+        .btn-primary:hover:not(:disabled) { background-color: #38bdf8; }
+        .btn-secondary { background-color: #334155; color: #94a3b8; }
+        .btn-secondary:hover:not(:disabled) { background-color: #475569; }
+        .btn:disabled { background-color: #475569; color: #64748b; cursor: not-allowed; opacity: 0.5; }
     </style>
 </head>
 <body class="min-h-screen p-4 sm:p-8 flex items-center justify-center">
 
-    <div class="container mx-auto max-w-7xl">
-        <!-- Часть 0: Настройка команды -->
-        <section id="setup-section">
-            <div class="max-w-2xl mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700">
-                <h1 class="text-3xl sm:text-4xl font-serif text-sky-300 mb-2 text-center">Подготовка к Игре</h1>
-                <p class="text-center text-slate-400 mb-8">Создайте свою команду для приключения.</p>
+    <div id="language-switcher" class="hidden fixed top-4 right-4 z-50">
+        <button id="lang-toggle-btn" class="btn btn-secondary px-3 py-2 rounded-md font-semibold text-sm"></button>
+    </div>
 
+    <div class="container mx-auto max-w-7xl">
+        <!-- Часть -1: Выбор языка -->
+        <section id="language-selection">
+            <div class="max-w-md mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-8 shadow-2xl border border-slate-700 text-center">
+                 <h1 class="text-3xl font-serif text-sky-300 mb-6">Выберите язык / Tilni tanlang</h1>
+                 <div class="flex flex-col space-y-4">
+                    <button class="btn btn-primary py-3 rounded-md font-bold text-lg" onclick="initGame('ru')">Русский</button>
+                    <button class="btn btn-primary py-3 rounded-md font-bold text-lg" onclick="initGame('uz')">O'zbekcha</button>
+                 </div>
+            </div>
+        </section>
+
+        <!-- Часть 0: Настройка команды -->
+        <section id="setup-section" class="hidden">
+            <div class="max-w-2xl mx-auto bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700">
+                <h1 class="text-3xl sm:text-4xl font-serif text-sky-300 mb-2 text-center" data-lang="setupTitle"></h1>
+                <p class="text-center text-slate-400 mb-8" data-lang="setupSubtitle"></p>
                 <div class="space-y-6">
                     <div>
-                        <label for="team-name" class="block text-sm font-medium text-slate-300 mb-2">Название команды</label>
-                        <input type="text" id="team-name" class="form-input w-full rounded-md p-2" placeholder="Например, 'Морские Волки'">
+                        <label for="team-name" class="block text-sm font-medium text-slate-300 mb-2" data-lang="teamNameLabel"></label>
+                        <input type="text" id="team-name" class="form-input w-full rounded-md p-2" data-lang-placeholder="teamNamePlaceholder">
                     </div>
-
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Участники (<span id="participant-count">0</span>/15)</label>
+                        <label class="block text-sm font-medium text-slate-300 mb-2"><span data-lang="participantsLabel"></span> (<span id="participant-count">0</span>/15)</label>
                         <div class="flex gap-2">
-                            <input type="text" id="participant-name" class="form-input w-full rounded-md p-2" placeholder="Введите имя участника">
-                            <button id="add-participant-btn" class="btn btn-secondary px-4 py-2 rounded-md font-semibold">Добавить</button>
+                            <input type="text" id="participant-name" class="form-input w-full rounded-md p-2" data-lang-placeholder="participantNamePlaceholder">
+                            <button id="add-participant-btn" class="btn btn-secondary px-4 py-2 rounded-md font-semibold" data-lang="addBtn"></button>
                         </div>
-                         <p class="text-xs text-slate-500 mt-2">Минимум 3 участника для начала игры.</p>
+                         <p class="text-xs text-slate-500 mt-2" data-lang="participantsRule"></p>
                     </div>
-
                     <div>
-                        <h3 class="font-semibold text-slate-300 mb-2">Список команды:</h3>
+                        <h3 class="font-semibold text-slate-300 mb-2" data-lang="teamListLabel"></h3>
                         <ul id="participants-list" class="bg-slate-900/50 p-3 rounded-md min-h-[80px] space-y-1">
-                            <li id="no-participants" class="text-slate-500 italic">Здесь появятся имена участников...</li>
+                            <li id="no-participants" class="text-slate-500 italic" data-lang="noParticipants"></li>
                         </ul>
                     </div>
-
-                    <button id="start-game-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-lg" disabled>Начать игру</button>
+                    <button id="start-game-btn" class="btn btn-primary w-full py-3 rounded-md font-bold text-lg" data-lang="startGameBtn" disabled></button>
                 </div>
             </div>
         </section>
 
         <!-- Основная игра (скрыта по умолчанию) -->
         <div id="game-container" class="hidden">
-            <!-- Часть 1: Игра -->
             <header class="text-center mb-8">
-                <h1 class="text-4xl sm:text-6xl font-serif text-sky-300 mb-2 fade-in">Кораблекрушение</h1>
-                <p class="text-lg text-slate-400 max-w-3xl mx-auto fade-in" style="animation-delay: 0.2s;">Классическое упражнение на групповое принятие решений в стрессовой ситуации.</p>
+                <h1 class="text-4xl sm:text-6xl font-serif text-sky-300 mb-2 fade-in" data-lang="gameTitle"></h1>
+                <p class="text-lg text-slate-400 max-w-3xl mx-auto fade-in" style="animation-delay: 0.2s;" data-lang="gameSubtitle"></p>
             </header>
-
             <main id="game-section" class="fade-in" style="animation-delay: 0.4s;">
                 <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-2xl border border-slate-700 mb-8">
-                    <h2 class="text-2xl font-bold text-sky-400 mb-3">Сценарий</h2>
-                    <p class="text-slate-300 leading-relaxed">Вы — команда, выжившая после кораблекрушения. Вы оказались на необитаемом острове. У вас есть список из 15 предметов, выброшенных на берег. Ваша спасательная шлюпка может вместить <strong class="text-yellow-300">только 5 из них</strong>, чтобы отправиться к соседнему, более безопасному острову. Ваша задача — <strong class="text-yellow-300">за 10 минут</strong> договориться и выбрать 5 самых важных предметов.</p>
+                    <h2 class="text-2xl font-bold text-sky-400 mb-3" data-lang="scenarioTitle"></h2>
+                    <p class="text-slate-300 leading-relaxed" data-lang="scenarioText"></p>
                 </div>
-                
                 <div class="sticky top-4 bg-slate-900/80 backdrop-blur-md p-4 rounded-lg z-10 shadow-lg mb-8 border border-slate-700">
-                     <h3 class="text-xl font-bold text-center text-sky-400 mb-2">Ваш выбор (<span id="selected-count">0</span>/5)</h3>
+                     <h3 class="text-xl font-bold text-center text-sky-400 mb-2" data-lang="yourChoice"></h3>
                      <div id="selected-items-display" class="flex flex-wrap gap-3 justify-center min-h-[40px]">
-                         <p id="selection-placeholder" class="text-slate-500 italic">Выберите предметы из списка ниже...</p>
+                         <p id="selection-placeholder" class="text-slate-500 italic" data-lang="selectItemsPlaceholder"></p>
                      </div>
                 </div>
-
-                <div id="items-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-                    <!-- Карточки предметов будут вставлены сюда с помощью JS -->
-                </div>
+                <div id="items-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6"></div>
             </main>
-
-            <!-- Часть 2: Продолжение и анализ -->
             <div id="results-container" class="relative mt-12 overflow-hidden">
                 <div class="results-content p-6 sm:p-8 rounded-xl bg-slate-800/50 border border-slate-700">
                     <div class="text-center mb-8">
-                        <h2 class="text-3xl sm:text-4xl font-serif text-green-300 mb-2">Рейтинг Экспертов</h2>
-                        <p class="text-slate-400 max-w-2xl mx-auto">Сравните ваш выбор с рейтингом, составленным экспертами по выживанию.</p>
+                        <h2 class="text-3xl sm:text-4xl font-serif text-green-300 mb-2" data-lang="expertsRatingTitle"></h2>
+                        <p class="text-slate-400 max-w-2xl mx-auto" data-lang="expertsRatingSubtitle"></p>
                     </div>
-
-                    <div class="space-y-6 mb-12">
-                         <!-- Список экспертов будет вставлен сюда -->
-                    </div>
-
+                    <div class="space-y-6 mb-12" id="expert-results-list"></div>
                     <div class="border-t border-slate-700 pt-8">
-                        <h2 class="text-3xl sm:text-4xl font-serif text-amber-300 mb-6 text-center">Обсуждение и Рефлексия</h2>
-                        <div id="discussion-questions" class="space-y-4 text-slate-300">
-                            <!-- Вопросы будут вставлены сюда -->
-                        </div>
+                        <h2 class="text-3xl sm:text-4xl font-serif text-amber-300 mb-6 text-center" data-lang="discussionTitle"></h2>
+                        <div id="discussion-questions" class="space-y-4 text-slate-300"></div>
                     </div>
                 </div>
-                
                 <div id="curtain">
                     <div class="text-center">
-                        <button id="submit-button" class="btn btn-primary text-xl font-bold py-4 px-8 rounded-lg shadow-lg transform hover:scale-105 cursor-pointer transition-opacity" disabled>
-                            Отправить
-                        </button>
-                        <p id="submit-helper-text" class="mt-4 text-slate-400">Сделайте выбор из 5 предметов, чтобы продолжить</p>
+                        <button id="submit-button" class="btn btn-primary text-xl font-bold py-4 px-8 rounded-lg shadow-lg transform hover:scale-105 cursor-pointer transition-opacity" data-lang="submitBtn" disabled></button>
+                        <p id="submit-helper-text" class="mt-4 text-slate-400"></p>
                     </div>
                 </div>
             </div>
@@ -217,7 +179,74 @@
     </div>
 
     <script>
-        // --- DATA ---
+        // --- TRANSLATIONS & DATA ---
+        const translations = {
+            ru: {
+                setupTitle: "Подготовка к Игре",
+                setupSubtitle: "Создайте свою команду для приключения.",
+                teamNameLabel: "Название команды",
+                teamNamePlaceholder: "Например, 'Морские Волки'",
+                participantsLabel: "Участники",
+                addBtn: "Добавить",
+                participantsRule: "Минимум 3 участника для начала игры.",
+                teamListLabel: "Список команды:",
+                noParticipants: "Здесь появятся имена участников...",
+                startGameBtn: "Начать игру",
+                gameTitle: "Кораблекрушение",
+                gameSubtitle: "Классическое упражнение на групповое принятие решений в стрессовой ситуации.",
+                scenarioTitle: "Сценарий",
+                scenarioText: "Вы — команда, выжившая после кораблекрушения. Вы оказались на необитаемом острове. У вас есть список из 15 предметов, выброшенных на берег. Ваша спасательная шлюпка может вместить <strong class='text-yellow-300'>только 5 из них</strong>, чтобы отправиться к соседнему, более безопасному острову. Ваша задача — <strong class='text-yellow-300'>за 10 минут</strong> договориться и выбрать 5 самых важных предметов.",
+                yourChoice: "Ваш выбор (<span id='selected-count'>0</span>/5)",
+                selectItemsPlaceholder: "Выберите предметы из списка ниже...",
+                submitBtn: "Отправить",
+                submitHelperDefault: "Сделайте выбор из 5 предметов, чтобы продолжить",
+                submitHelperSuccess: "Отлично! Теперь можно отправлять результаты.",
+                submitHelperMore: "Выберите еще {count} предмет(а).",
+                expertsRatingTitle: "Рейтинг Экспертов",
+                expertsRatingSubtitle: "Сравните ваш выбор с рейтингом, составленным экспертами по выживанию.",
+                yourChoiceChip: "ВАШ ВЫБОР",
+                discussionTitle: "Обсуждение и Рефлексия",
+                telegramTitle: "Результаты игры \"Кораблекрушение\"",
+                telegramTeam: "Команда",
+                telegramParticipants: "Участники",
+                telegramItems: "Выбранные предметы",
+                langToggle: "O'zbekcha",
+                alertMaxItems: "Можно выбрать только 5 предметов!"
+            },
+            uz: {
+                setupTitle: "O'yinga tayyorgarlik",
+                setupSubtitle: "Sarguzasht uchun o'z jamoangizni yarating.",
+                teamNameLabel: "Jamoa nomi",
+                teamNamePlaceholder: "Masalan, 'Dengiz Bo'rilari'",
+                participantsLabel: "Ishtirokchilar",
+                addBtn: "Qo'shish",
+                participantsRule: "O'yinni boshlash uchun kamida 3 ishtirokchi kerak.",
+                teamListLabel: "Jamoa ro'yxati:",
+                noParticipants: "Ishtirokchilarning ismlari shu yerda paydo bo'ladi...",
+                startGameBtn: "O'yinni boshlash",
+                gameTitle: "Kema halokati",
+                gameSubtitle: "Stressli vaziyatda guruh bo'lib qaror qabul qilish uchun klassik mashq.",
+                scenarioTitle: "Ssenariy",
+                scenarioText: "Siz — kema halokatidan omon qolgan jamoasiz. Siz kimsasiz orolga tushib qoldingiz. Sohilda 15 ta narsa yotibdi. Sizning qutqaruv qayig'ingiz qo'shni, xavfsizroq orolga borish uchun ulardan <strong class='text-yellow-300'>faqat 5 tasini</strong> sig'dira oladi. Sizning vazifangiz — <strong class='text-yellow-300'>10 daqiqa ichida</strong> kelishib, eng muhim 5 ta narsani tanlash.",
+                yourChoice: "Sizning tanlovingiz (<span id='selected-count'>0</span>/5)",
+                selectItemsPlaceholder: "Quyidagi ro'yxatdan narsalarni tanlang...",
+                submitBtn: "Yuborish",
+                submitHelperDefault: "Davom etish uchun 5 ta narsani tanlang",
+                submitHelperSuccess: "Ajoyib! Endi natijalarni yuborish mumkin.",
+                submitHelperMore: "Yana {count} ta narsa tanlang.",
+                expertsRatingTitle: "Mutaxassislar reytingi",
+                expertsRatingSubtitle: "O'z tanlovingizni omon qolish bo'yicha mutaxassislar tomonidan tuzilgan reyting bilan solishtiring.",
+                yourChoiceChip: "SIZNING TANLOVINGIZ",
+                discussionTitle: "Muhokama va Tahlil",
+                telegramTitle: "\"Kema halokati\" o'yini natijalari",
+                telegramTeam: "Jamoa",
+                telegramParticipants: "Ishtirokchilar",
+                telegramItems: "Tanlangan narsalar",
+                langToggle: "Русский",
+                alertMaxItems: "Faqat 5 ta narsa tanlash mumkin!"
+            }
+        };
+
         const svgIcons = {
             water: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 2H10.5C8.01472 2 6 4.01472 6 6.5V17.5C6 19.9853 8.01472 22 10.5 22H13.5C15.9853 22 18 19.9853 18 17.5V6.5C18 4.01472 15.9853 2 13.5 2Z"></path><path d="M9 12H15"></path><path d="M12 9V15"></path></svg>`,
             matches: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H16C17.6569 21 19 19.6569 19 18V6C19 4.34315 17.6569 3 16 3Z"></path><path d="M12 16V10"></path><path d="M9 7H15"></path></svg>`,
@@ -235,58 +264,91 @@
             pistol: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L16 8"></path><path d="M18 6L14 10"></path><path d="M16 12H8V21H16V12Z"></path><path d="M8 12L3 7V3H7L12 8"></path></svg>`,
             raft: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12H16"></path><path d="M12 8V16"></path><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"></path></svg>`
         };
-
+        
         const itemsData = [
-            { id: 9, name: 'Сигнальное зеркало', svg: svgIcons.mirror, expertRank: 1, explanation: 'Главная цель — быть спасенным. Зеркало — самый эффективный способ привлечь внимание спасателей.' },
-            { id: 1, name: 'Канистра с водой', svg: svgIcons.water, expertRank: 2, explanation: 'Без воды человек может прожить всего несколько дней. Это критически важный ресурс.' },
-            { id: 2, name: 'Коробок спичек', svg: svgIcons.matches, expertRank: 3, explanation: 'Огонь — это тепло (защита от переохлаждения), возможность вскипятить воду, приготовить пищу и подать сигнал ночью.' },
-            { id: 13, name: 'Нож', svg: svgIcons.knife, expertRank: 4, explanation: 'Универсальный инструмент: поможет в строительстве укрытия, добыче пищи, защите.' },
-            { id: 3, name: 'Карта острова', svg: svgIcons.map, expertRank: 5, explanation: 'Поможет найти источники пресной воды, безопасные места и спланировать маршрут.' },
-            { id: 4, name: 'Аптечка', svg: svgIcons.firstAid, expertRank: 6, explanation: 'Важна для оказания первой помощи, но другие предметы имеют более высокий приоритет для выживания группы.' },
-            { id: 5, name: 'Топор', svg: svgIcons.axe, expertRank: 7, explanation: 'Полезный инструмент для строительства и заготовки дров, но менее универсален, чем нож.' },
-            { id: 6, name: 'Веревка', svg: svgIcons.rope, expertRank: 8, explanation: 'Многоцелевой предмет, полезный для строительства укрытия и создания инструментов.' },
-            { id: 8, name: 'Рыболовная сеть', svg: svgIcons.fishingNet, expertRank: 9, explanation: 'Хороший источник пищи, но требует времени и удачи. Другие способы добычи еды могут быть проще.' },
-            { id: 12, name: 'Книга о растениях', svg: svgIcons.book, expertRank: 10, explanation: 'Полезна для поиска съедобных растений, но требует времени на изучение и применение.' },
-            { id: 7, name: 'Спальный мешок', svg: svgIcons.sleepingBag, expertRank: 11, explanation: 'Обеспечивает комфорт, но укрытие можно построить из подручных материалов.' },
-            { id: 10, name: 'Шоколад', svg: svgIcons.chocolate, expertRank: 12, explanation: 'Быстрый источник энергии, но его мало, и он не является долгосрочным решением проблемы голода.' },
-            { id: 14, name: 'Пистолет', svg: svgIcons.pistol, expertRank: 13, explanation: 'Может быть использован для самозащиты или охоты, но очень громкий и требует навыков.' },
-            { id: 15, name: 'Надувной плот', svg: svgIcons.raft, expertRank: 14, explanation: 'Ненадежное средство для перемещения по открытой воде, легко повредить.' },
-            { id: 11, name: 'Ноутбук (солн. бат.)', svg: svgIcons.laptop, expertRank: 15, explanation: 'Практически бесполезен в условиях выживания без доступа к сети.' }
+            { id: 9, svg: svgIcons.mirror, expertRank: 1, ru: { name: 'Сигнальное зеркало', explanation: 'Главная цель — быть спасенным. Зеркало — самый эффективный способ привлечь внимание спасателей.' }, uz: { name: 'Signal oynasi', explanation: 'Asosiy maqsad — qutqarilish. Oyna qutqaruvchilar e\'tiborini jalb qilishning eng samarali usuli.' } },
+            { id: 1, svg: svgIcons.water, expertRank: 2, ru: { name: 'Канистра с водой', explanation: 'Без воды человек может прожить всего несколько дней. Это критически важный ресурс.' }, uz: { name: 'Suv idishi', explanation: 'Suvsiz inson bir necha kun yashay oladi. Bu juda muhim manba.' } },
+            { id: 2, svg: svgIcons.matches, expertRank: 3, ru: { name: 'Коробок спичек', explanation: 'Огонь — это тепло, возможность вскипятить воду, приготовить пищу и подать сигнал ночью.' }, uz: { name: 'Gugurt qutisi', explanation: 'Olov — bu issiqlik, suvni qaynatish, ovqat pishirish va tunda signal berish imkoniyati.' } },
+            { id: 13, svg: svgIcons.knife, expertRank: 4, ru: { name: 'Нож', explanation: 'Универсальный инструмент: поможет в строительстве укрытия, добыче пищи, защите.' }, uz: { name: 'Pichoq', explanation: 'Universal asbob: boshpana qurish, oziq-ovqat topish, himoyalanishga yordam beradi.' } },
+            { id: 3, svg: svgIcons.map, expertRank: 5, ru: { name: 'Карта острова', explanation: 'Поможет найти источники пресной воды, безопасные места и спланировать маршрут.' }, uz: { name: 'Orol xaritasi', explanation: 'Chuchuk suv manbalarini, xavfsiz joylarni topishga va marshrutni rejalashtirishga yordam beradi.' } },
+            { id: 4, svg: svgIcons.firstAid, expertRank: 6, ru: { name: 'Аптечка', explanation: 'Важна для оказания первой помощи, но другие предметы имеют более высокий приоритет.' }, uz: { name: 'Aptechka', explanation: 'Birinchi yordam ko\'rsatish uchun muhim, ammo boshqa narsalar ustuvorroq.' } },
+            { id: 5, svg: svgIcons.axe, expertRank: 7, ru: { name: 'Топор', explanation: 'Полезный инструмент для строительства, но менее универсален, чем нож.' }, uz: { name: 'Bolta', explanation: 'Qurilish uchun foydali asbob, lekin pichoq kabi universal emas.' } },
+            { id: 6, svg: svgIcons.rope, expertRank: 8, ru: { name: 'Веревка', explanation: 'Многоцелевой предмет, полезный для строительства укрытия и создания инструментов.' }, uz: { name: 'Arqon', explanation: 'Ko\'p maqsadli buyum, boshpana qurish va asboblar yasash uchun foydali.' } },
+            { id: 8, svg: svgIcons.fishingNet, expertRank: 9, ru: { name: 'Рыболовная сеть', explanation: 'Хороший источник пищи, но требует времени и удачи.' }, uz: { name: 'Baliq ovlash to\'ri', explanation: 'Yaxshi oziq-ovqat manbai, ammo vaqt va omad talab qiladi.' } },
+            { id: 12, svg: svgIcons.book, expertRank: 10, ru: { name: 'Книга о растениях', explanation: 'Полезна для поиска съедобных растений, но требует времени.' }, uz: { name: 'O\'simliklar haqida kitob', explanation: 'Iste\'mol qilish mumkin bo\'lgan o\'simliklarni topish uchun foydali, ammo vaqt talab etadi.' } },
+            { id: 7, svg: svgIcons.sleepingBag, expertRank: 11, ru: { name: 'Спальный мешок', explanation: 'Обеспечивает комфорт, но укрытие можно построить из подручных материалов.' }, uz: { name: 'Uyqu qopi', explanation: 'Qulaylikni ta\'minlaydi, ammo boshpanani mavjud materiallardan qurish mumkin.' } },
+            { id: 10, svg: svgIcons.chocolate, expertRank: 12, ru: { name: 'Шоколад', explanation: 'Быстрый источник энергии, но его мало, и он не является долгосрочным решением.' }, uz: { name: 'Shokolad', explanation: 'Tez energiya manbai, lekin u kam va uzoq muddatli yechim emas.' } },
+            { id: 14, svg: svgIcons.pistol, expertRank: 13, ru: { name: 'Пистолет', explanation: 'Может быть использован для самозащиты или охоты, но очень громкий.' }, uz: { name: 'To\'pponcha', explanation: 'O\'zini himoya qilish yoki ov qilish uchun ishlatilishi mumkin, ammo juda shovqinli.' } },
+            { id: 15, svg: svgIcons.raft, expertRank: 14, ru: { name: 'Надувной плот', explanation: 'Ненадежное средство для перемещения по открытой воде, легко повредить.' }, uz: { name: 'Puflanadigan sol', explanation: 'Ochiq suvda harakatlanish uchun ishonchsiz vosita, oson shikastlanadi.' } },
+            { id: 11, svg: svgIcons.laptop, expertRank: 15, ru: { name: 'Ноутбук (солн. бат.)', explanation: 'Практически бесполезен в условиях выживания без доступа к сети.' }, uz: { name: 'Noutbuk (quyosh bat.)', explanation: 'Tarmoqqa ulanmasdan omon qolish sharoitida deyarli foydasiz.' } }
         ];
 
         const discussionQuestionsData = [
-            { question: 'О процессе:', details: 'Как именно вы принимали решение? Голосовали? Пытались убедить друг друга? Может, кто-то один принял решение за всех?' },
-            { question: 'О лидерстве:', details: 'Появился ли в группе лидер? Если да, то как он себя проявил? Его назначили или он сам взял на себя эту роль?' },
-            { question: 'Об аргументах:', details: 'Чьи аргументы были самыми убедительными и почему? Какие предметы вызвали больше всего споров?' },
-            { question: 'О невысказанном:', details: 'Были ли у кого-то идеи, которые так и не были услышаны? Почему так произошло, как вы думаете?' },
-            { question: 'Об эмоциях:', details: 'Что было самым сложным: выбрать первый, самый очевидный предмет, или отказаться от шестого, тоже очень нужного?' }
+            { ru: { q: 'О процессе:', d: 'Как именно вы принимали решение? Голосовали? Пытались убедить друг друга? Может, кто-то один принял решение за всех?' }, uz: { q: 'Jarayon haqida:', d: 'Qarorni qanday qabul qildingiz? Ovoz berdingizmi? Bir-biringizni ishontirishga harakat qildingizmi? Yoki kimdir hamma uchun qaror qabul qildimi?' } },
+            { ru: { q: 'О лидерстве:', d: 'Появился ли в группе лидер? Если да, то как он себя проявил? Его назначили или он сам взял на себя эту роль?' }, uz: { q: 'Yetakchilik haqida:', d: 'Guruhda yetakchi paydo bo\'ldimi? Agar ha bo\'lsa, u o\'zini qanday namoyon etdi? Uni tayinlashdimi yoki o\'zi bu rolni oldimi?' } },
+            { ru: { q: 'Об аргументах:', d: 'Чьи аргументы были самыми убедительными и почему? Какие предметы вызвали больше всего споров?' }, uz: { q: 'Dalillar haqida:', d: 'Kimning dalillari eng ishonchli bo\'ldi va nima uchun? Qaysi narsalar eng ko\'p bahs-munozaralarga sabab bo\'ldi?' } },
+            { ru: { q: 'О невысказанном:', d: 'Были ли у кого-то идеи, которые так и не были услышаны? Почему так произошло, как вы думаете?' }, uz: { q: 'Aytilmagan fikrlar haqida:', d: 'Kimdadir eshitilmagan g\'oyalar bo\'ldimi? Sizningcha, nima uchun bunday bo\'ldi?' } },
+            { ru: { q: 'Об эмоциях:', d: 'Что было самым сложным: выбрать первый, самый очевидный предмет, или отказаться от шестого, тоже очень нужного?' }, uz: { q: 'Hissiyotlar haqida:', d: 'Nima eng qiyin bo\'ldi: birinchi, eng aniq narsani tanlashmi yoki oltinchi, juda kerakli bo\'lgan narsadan voz kechishmi?' } }
         ];
 
         // --- STATE ---
+        let currentLanguage = 'ru';
         let teamName = '';
         let participants = [];
         let selectedItems = [];
 
-        // --- SETUP SELECTORS ---
+        // --- SELECTORS ---
+        const languageSelection = document.getElementById('language-selection');
+        const languageSwitcher = document.getElementById('language-switcher');
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
         const setupSection = document.getElementById('setup-section');
+        const gameContainer = document.getElementById('game-container');
         const teamNameInput = document.getElementById('team-name');
         const participantNameInput = document.getElementById('participant-name');
         const addParticipantBtn = document.getElementById('add-participant-btn');
-        const participantsList = document.getElementById('participants-list');
+        const participantsListEl = document.getElementById('participants-list');
         const participantCountEl = document.getElementById('participant-count');
-        const noParticipantsEl = document.getElementById('no-participants');
         const startGameBtn = document.getElementById('start-game-btn');
-
-        // --- GAME SELECTORS ---
-        const gameContainer = document.getElementById('game-container');
         const itemsGrid = document.getElementById('items-grid');
-        const selectedCountEl = document.getElementById('selected-count');
         const selectedItemsDisplay = document.getElementById('selected-items-display');
-        const selectionPlaceholder = document.getElementById('selection-placeholder');
         const curtain = document.getElementById('curtain');
         const submitButton = document.getElementById('submit-button');
         const submitHelperText = document.getElementById('submit-helper-text');
         
+        // --- LANGUAGE LOGIC ---
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang;
+            const t = translations[lang];
+
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.dataset.lang;
+                if (t[key]) el.innerHTML = t[key];
+            });
+            document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+                const key = el.dataset.langPlaceholder;
+                if (t[key]) el.placeholder = t[key];
+            });
+
+            langToggleBtn.textContent = t.langToggle;
+            
+            renderParticipants();
+            renderItems();
+            updateSelection();
+        }
+
+        function initGame(lang) {
+            languageSelection.classList.add('hidden');
+            setupSection.classList.remove('hidden');
+            languageSwitcher.classList.remove('hidden');
+            setLanguage(lang);
+        }
+
+        langToggleBtn.addEventListener('click', () => {
+            const newLang = currentLanguage === 'ru' ? 'uz' : 'ru';
+            setLanguage(newLang);
+        });
+
         // --- SETUP LOGIC ---
         function validateSetup() {
             teamName = teamNameInput.value.trim();
@@ -296,9 +358,13 @@
         }
 
         function renderParticipants() {
-            participantsList.innerHTML = '';
+            const t = translations[currentLanguage];
+            participantsListEl.innerHTML = '';
             if (participants.length === 0) {
-                participantsList.appendChild(noParticipantsEl);
+                const li = document.createElement('li');
+                li.className = 'text-slate-500 italic';
+                li.textContent = t.noParticipants;
+                participantsListEl.appendChild(li);
             } else {
                 participants.forEach((name, index) => {
                     const li = document.createElement('li');
@@ -307,19 +373,189 @@
                     
                     const removeBtn = document.createElement('button');
                     removeBtn.innerHTML = '&times;';
-                    removeBtn.className = 'text-red-400 font-bold text-xl hover:text-red-200';
+                    removeBtn.className = 'text-red-400 font-bold text-xl hover:text-red-200 ml-2';
                     removeBtn.onclick = () => {
                         participants.splice(index, 1);
                         renderParticipants();
                     };
                     li.appendChild(removeBtn);
-                    participantsList.appendChild(li);
+                    participantsListEl.appendChild(li);
                 });
             }
             participantCountEl.textContent = participants.length;
             validateSetup();
         }
+        
+        // --- GAME LOGIC ---
+        function renderItems() {
+            itemsGrid.innerHTML = '';
+            itemsData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card bg-slate-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-1 flex flex-col';
+                card.dataset.id = item.id;
+                const itemLang = item[currentLanguage];
+                
+                card.innerHTML = `
+                    <div class="relative flex-grow flex items-center justify-center p-4 text-sky-300">
+                        <div class="w-20 h-20">${item.svg}</div>
+                        <div class="overlay absolute inset-0 bg-sky-500/50 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900/50">
+                        <h4 class="font-bold text-center text-slate-200 text-sm">${itemLang.name}</h4>
+                    </div>
+                `;
+                card.addEventListener('click', () => toggleItemSelection(item.id));
+                itemsGrid.appendChild(card);
+            });
+             updateSelection();
+        }
 
+        function toggleItemSelection(id) {
+            const itemIndex = selectedItems.indexOf(id);
+            if (itemIndex > -1) {
+                selectedItems.splice(itemIndex, 1);
+            } else {
+                if (selectedItems.length < 5) {
+                    selectedItems.push(id);
+                } else {
+                    const t = translations[currentLanguage];
+                    const message = document.createElement('div');
+                    message.textContent = t.alertMaxItems;
+                    message.className = 'fixed top-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg animate-pulse';
+                    document.body.appendChild(message);
+                    setTimeout(() => message.remove(), 2000);
+                    return;
+                }
+            }
+            updateSelection();
+        }
+        
+        function updateSelection() {
+            document.querySelectorAll('.item-card').forEach(card => {
+                card.classList.toggle('selected', selectedItems.includes(parseInt(card.dataset.id)));
+            });
+
+            const selectedCountEl = document.getElementById('selected-count');
+            if(selectedCountEl) selectedCountEl.textContent = selectedItems.length;
+
+            const selectionPlaceholder = document.getElementById('selection-placeholder');
+            selectedItemsDisplay.innerHTML = '';
+            if (selectedItems.length > 0) {
+                if(selectionPlaceholder) selectionPlaceholder.style.display = 'none';
+                selectedItems.map(id => itemsData.find(item => item.id === id))
+                    .forEach(item => {
+                        const chip = document.createElement('div');
+                        chip.className = 'bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-semibold';
+                        chip.textContent = item[currentLanguage].name;
+                        selectedItemsDisplay.appendChild(chip);
+                    });
+            } else {
+                if(selectionPlaceholder) {
+                    selectionPlaceholder.style.display = 'block';
+                    selectionPlaceholder.textContent = translations[currentLanguage].selectItemsPlaceholder;
+                }
+            }
+
+            const t = translations[currentLanguage];
+            if (selectedItems.length === 5) {
+                submitButton.disabled = false;
+                submitHelperText.textContent = t.submitHelperSuccess;
+            } else {
+                submitButton.disabled = true;
+                if (selectedItems.length > 0) {
+                    submitHelperText.textContent = t.submitHelperMore.replace('{count}', 5 - selectedItems.length);
+                } else {
+                    submitHelperText.textContent = t.submitHelperDefault;
+                }
+            }
+        }
+        
+        function renderResults() {
+            const expertItems = [...itemsData].sort((a, b) => a.expertRank - b.expertRank);
+            const t = translations[currentLanguage];
+            const resultsContainer = document.getElementById('expert-results-list');
+            resultsContainer.innerHTML = '';
+
+            expertItems.slice(0, 5).forEach(item => {
+                const isUserSelected = selectedItems.includes(item.id);
+                const itemLang = item[currentLanguage];
+                const resultCard = document.createElement('div');
+                resultCard.className = `flex items-start space-x-4 p-4 rounded-lg border-2 ${isUserSelected ? 'bg-green-500/20 border-green-400' : 'bg-slate-700/50 border-slate-600'}`;
+                
+                resultCard.innerHTML = `
+                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-sky-800 rounded-full text-sky-300 text-2xl font-bold font-serif">
+                        ${item.expertRank}
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-100 flex items-center">
+                            ${itemLang.name}
+                            ${isUserSelected ? `<span class="ml-3 text-xs bg-green-400 text-green-900 font-bold px-2 py-0.5 rounded-full">${t.yourChoiceChip}</span>` : ''}
+                        </h3>
+                        <p class="text-slate-400">${itemLang.explanation}</p>
+                    </div>
+                `;
+                resultsContainer.appendChild(resultCard);
+            });
+        }
+
+        function renderDiscussionQuestions() {
+            const questionsContainer = document.getElementById('discussion-questions');
+            questionsContainer.innerHTML = '';
+            discussionQuestionsData.forEach(q => {
+                const questionLang = q[currentLanguage];
+                const questionEl = document.createElement('div');
+                questionEl.innerHTML = `
+                    <p><strong class="font-bold text-amber-400">${questionLang.q}</strong> ${questionLang.d}</p>
+                `;
+                questionsContainer.appendChild(questionEl);
+            });
+        }
+
+        async function sendResultsToTelegram() {
+            const botToken = '1730744154:AAGxL3yNgmoN3LOZvOWdNGu6Wgxt81TacXE';
+            const chatId = '-1002786023091';
+            const t = translations[currentLanguage];
+
+            const selectedItemsNames = selectedItems.map(id => {
+                const item = itemsData.find(i => i.id === id);
+                return `- ${item[currentLanguage].name}`;
+            }).join('\n');
+
+            const participantsList = participants.map(name => `- ${name}`).join('\n');
+
+            const message = `
+*${t.telegramTitle}*
+--------------------------------------
+*${t.telegramTeam}:* ${teamName}
+*${t.telegramParticipants}:*
+${participantsList}
+--------------------------------------
+*${t.telegramItems}:*
+${selectedItemsNames}
+            `;
+
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message.trim(),
+                        parse_mode: 'Markdown'
+                    })
+                });
+                const data = await response.json();
+                if (!data.ok) console.error('Telegram API Error:', data.description);
+            } catch (error) {
+                console.error('Failed to send message to Telegram:', error);
+            }
+        }
+
+        // --- Event Listeners ---
         addParticipantBtn.addEventListener('click', () => {
             const name = participantNameInput.value.trim();
             if (name && participants.length < 15) {
@@ -331,9 +567,7 @@
         });
 
         participantNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addParticipantBtn.click();
-            }
+            if (e.key === 'Enter') addParticipantBtn.click();
         });
 
         teamNameInput.addEventListener('input', validateSetup);
@@ -344,169 +578,8 @@
             renderItems();
         });
 
-        // --- GAME LOGIC ---
-        function renderItems() {
-            itemsGrid.innerHTML = '';
-            itemsData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card bg-slate-800 rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-1 flex flex-col';
-                card.dataset.id = item.id;
-
-                card.innerHTML = `
-                    <div class="relative flex-grow flex items-center justify-center p-4 text-sky-300">
-                        <div class="w-20 h-20">${item.svg}</div>
-                        <div class="overlay absolute inset-0 bg-sky-500/50 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M20 6 9 17l-5-5"/></svg>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-slate-900/50">
-                        <h4 class="font-bold text-center text-slate-200 text-sm">${item.name}</h4>
-                    </div>
-                `;
-                
-                card.addEventListener('click', () => toggleItemSelection(item.id));
-                itemsGrid.appendChild(card);
-            });
-        }
-
-        function toggleItemSelection(id) {
-            const itemIndex = selectedItems.indexOf(id);
-            
-            if (itemIndex > -1) {
-                selectedItems.splice(itemIndex, 1);
-            } else {
-                if (selectedItems.length < 5) {
-                    selectedItems.push(id);
-                } else {
-                    const message = document.createElement('div');
-                    message.textContent = 'Можно выбрать только 5 предметов!';
-                    message.className = 'fixed top-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg animate-pulse';
-                    document.body.appendChild(message);
-                    setTimeout(() => message.remove(), 2000);
-                    return;
-                }
-            }
-            updateSelection();
-        }
-
-        function updateSelection() {
-            document.querySelectorAll('.item-card').forEach(card => {
-                card.classList.toggle('selected', selectedItems.includes(parseInt(card.dataset.id)));
-            });
-
-            selectedCountEl.textContent = selectedItems.length;
-
-            if (selectedItems.length > 0) {
-                selectionPlaceholder.style.display = 'none';
-                selectedItemsDisplay.innerHTML = '';
-                selectedItems.map(id => itemsData.find(item => item.id === id))
-                    .forEach(item => {
-                        const chip = document.createElement('div');
-                        chip.className = 'bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-semibold';
-                        chip.textContent = item.name;
-                        selectedItemsDisplay.appendChild(chip);
-                    });
-            } else {
-                selectionPlaceholder.style.display = 'block';
-                selectedItemsDisplay.innerHTML = '';
-            }
-
-            if (selectedItems.length === 5) {
-                submitButton.disabled = false;
-                submitHelperText.textContent = 'Отлично! Теперь можно отправлять результаты.';
-            } else {
-                submitButton.disabled = true;
-                if (selectedItems.length > 0) {
-                    submitHelperText.textContent = `Выберите еще ${5 - selectedItems.length} предмет(а).`;
-                } else {
-                    submitHelperText.textContent = 'Сделайте выбор из 5 предметов, чтобы продолжить';
-                }
-            }
-        }
-        
-        function renderResults() {
-            const expertItems = [...itemsData].sort((a, b) => a.expertRank - b.expertRank).slice(0, 5);
-            
-            const resultsContainer = document.querySelector('.space-y-6');
-            resultsContainer.innerHTML = '';
-
-            expertItems.forEach(item => {
-                const isUserSelected = selectedItems.includes(item.id);
-                const resultCard = document.createElement('div');
-                resultCard.className = `flex items-start space-x-4 p-4 rounded-lg border-2 ${isUserSelected ? 'bg-green-500/20 border-green-400' : 'bg-slate-700/50 border-slate-600'}`;
-                
-                resultCard.innerHTML = `
-                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-sky-800 rounded-full text-sky-300 text-2xl font-bold font-serif">
-                        ${item.expertRank}
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-100 flex items-center">
-                            ${item.name}
-                            ${isUserSelected ? '<span class="ml-3 text-xs bg-green-400 text-green-900 font-bold px-2 py-0.5 rounded-full">ВАШ ВЫБОР</span>' : ''}
-                        </h3>
-                        <p class="text-slate-400">${item.explanation}</p>
-                    </div>
-                `;
-                resultsContainer.appendChild(resultCard);
-            });
-        }
-
-        function renderDiscussionQuestions() {
-            const questionsContainer = document.getElementById('discussion-questions');
-            questionsContainer.innerHTML = '';
-            discussionQuestionsData.forEach(q => {
-                const questionEl = document.createElement('div');
-                questionEl.innerHTML = `
-                    <p><strong class="font-bold text-amber-400">${q.question}</strong> ${q.details}</p>
-                `;
-                questionsContainer.appendChild(questionEl);
-            });
-        }
-
-        async function sendResultsToTelegram() {
-            const botToken = '1730744154:AAGxL3yNgmoN3LOZvOWdNGu6Wgxt81TacXE';
-            const chatId = '-1002786023091';
-
-            const selectedItemsNames = selectedItems.map(id => {
-                const item = itemsData.find(i => i.id === id);
-                return `- ${item.name}`;
-            }).join('\n');
-
-            const participantsList = participants.map(name => `- ${name}`).join('\n');
-
-            const message = `
-*Результаты игры "Кораблекрушение"*
---------------------------------------
-*Команда:* ${teamName}
-*Участники:*
-${participantsList}
---------------------------------------
-*Выбранные предметы:*
-${selectedItemsNames}
-            `;
-
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message.trim(),
-                        parse_mode: 'Markdown'
-                    })
-                });
-                const data = await response.json();
-                console.log('Telegram API response:', data);
-            } catch (error) {
-                console.error('Failed to send message to Telegram:', error);
-            }
-        }
-
         submitButton.addEventListener('click', () => {
+            if(submitButton.disabled) return;
             curtain.classList.add('raised');
             renderResults();
             renderDiscussionQuestions();
@@ -516,8 +589,6 @@ ${selectedItemsNames}
             }, 300);
         });
 
-        // --- INITIALIZATION ---
-        renderParticipants(); // To set initial state for button
     </script>
 </body>
 </html>
