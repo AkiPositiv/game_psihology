@@ -683,7 +683,10 @@
                 const message = `*${t.telegramTitle}*\n--------------------------------------\n*${t.telegramUser}:* ${this.state.userName}\n*${t.finalScore}:* ${this.state.score} / ${this.state.totalRounds}\n*${t.avgReaction}:* ${avgTime} ms`;
                 const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
                 try {
-                    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, text: message.trim(), parse_mode: 'Markdown' }) });
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: chatId, text: message.trim(), parse_mode: 'Markdown' }) });
+                    if (!response.ok) {
+                        console.error('Telegram API Error:', await response.json());
+                    }
                 } catch (error) { console.error('Failed to send message to Telegram:', error); }
             }
         };
